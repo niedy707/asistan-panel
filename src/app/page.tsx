@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
@@ -20,7 +20,7 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
   };
 
   const containerClasses = isPreview
-    ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 overflow-hidden font-sans scale-[0.85] origin-top mb-12"
+    ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 font-sans aspect-[210/297] mb-12"
     : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[20mm] mx-auto";
 
   return (
@@ -159,6 +159,80 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
   );
 };
 
+/** 
+ * Passport/ID Renewal Medical Report component
+ */
+const IDReportPrintable = ({ data, isPreview = false }: { data: any, isPreview?: boolean }) => {
+  const containerClasses = isPreview
+    ? "w-full mt-8 p-12 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 font-sans aspect-[210/297] mb-12 overflow-y-auto"
+    : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[20mm] mx-auto";
+
+  return (
+    <div className={containerClasses} id={isPreview ? "preview-id-report" : "printable-id-report"}>
+      <div className="h-full flex flex-col">
+        <div className="space-y-4 mb-4">
+          <p className="font-bold text-base">Hasta Adı Soyadı: <span className="underline decoration-slate-300 underline-offset-4">{data.name || "..................."}</span></p>
+          <p className="font-bold text-base">Ameliyat Tarihi: <span className="underline decoration-slate-300 underline-offset-4">{data.surgeryDate || "..................."}</span></p>
+        </div>
+
+        <div className="space-y-6 flex-1 text-[13px] leading-relaxed">
+          <div>
+            <p className="font-bold mb-1">Tanı:</p>
+            <p className="text-justify">{data.diagnosis || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-1">Uygulanan Ameliyat:</p>
+            <p className="text-justify">{data.surgeryPerformed || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-1 underline underline-offset-4">Şikayet:</p>
+            <p className="text-justify">{data.complaint || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-1 underline underline-offset-4">Hikaye:</p>
+            <p className="text-justify">{data.history || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-1 underline underline-offset-4">Muayene:</p>
+            <p className="text-justify">{data.examination || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-1 underline underline-offset-4">Takip:</p>
+            <p className="text-justify">{data.followUp || "..................."}</p>
+          </div>
+
+          <div>
+            <p className="font-bold mb-2 underline underline-offset-4">Ameliyat notu:</p>
+            <p className="text-justify text-[11px] leading-tight opacity-90">{data.surgeryNote || "..................."}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-slate-200">
+          <p className="text-[12px] leading-snug">
+            Bu belge hasta talebi ile, <strong>Nüfus Müdürlüğü, Kaymakamlık</strong> gibi devlet kurumlarına ibraz edilmesi amacı ile, kimlik ya da ehliyet yenilenmesi için hazırlanmıştır.
+            Hastaya yapılan cerrahi işlem ile burun şeklinde değişiklik oluşmuştur. İlgili kuruma arz ederiz.
+          </p>
+        </div>
+
+        <div className="mt-12 flex justify-between items-end">
+          <div className="text-left font-bold text-base bg-slate-100 px-4 py-2 rounded-lg">
+            {data.reportDate || new Date().toLocaleDateString('tr-TR')}
+          </div>
+          <div className="text-right">
+            <p className="font-black text-lg">Op. Dr. İbrahim YAĞCI</p>
+            <p className="text-[10pt] font-bold text-slate-500 uppercase tracking-widest">KBB ve B.B.C Uzmanı</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CATEGORIES = [
   {
     id: "bilgilendirme",
@@ -223,6 +297,9 @@ const CATEGORIES = [
     color: "bg-amber-700/80",
     docs: [
       { name: "Ameliyat Raporu Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
+    ],
+    subItems: [
+      { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> }
     ]
   },
   {
@@ -236,6 +313,16 @@ const CATEGORIES = [
   }
 ];
 
+const PASSPORT_REPORT_TEMPLATE = {
+  diagnosis: "J34.2, J34.4 Nazal Septal Deviasyon + Nazal Konka Hipertrofisi",
+  surgeryPerformed: "Septorinoplasti + Konka redüksyonu",
+  complaint: "Burun tıkanıklığı ve burun şekil bozukluğu",
+  history: "Bu sebeple başvuran hastada saptanan septum deviasyonu ve hasta talepleri nedenli, opere edilmek üzere yatış yapıldı.",
+  examination: "Septum deviye, nazal valv yetmezliği mevcut. tip pitotik hump+",
+  followUp: "Septorinoplasti operasyonu yapılan ve takibinde sorun olmayan hasta 1 hafta sonra kontrole gelmek üzere önerilerle taburcu edildi.",
+  surgeryNote: "GAA ETentübasyon sonrası infiltrasyon anestezisini takiben operasyona başlandı. Goodmanın ters W insizyonu sonrası cilt flebi naziona kadar eleve edildi. ASAdan septuma ulaşılarak her iki tarafta mukoprikondrial flep eleve edildi. Dorsum redükte edildi, törpülenerek düzensizlikler giderildi. Sefalik rezeksiyon sonrası Tip definisyonu yapıldı. Deviye septum ve nazal taban çıkartıldı, septoplasti yapıldı. Median-oblik ve internal lateral osteotomiler yapıldı. Orta çatı onarıldı. Tip eşitleme suturu sonrası kolumellar strut yerleştirildi. İnsizyon suture edildi. Bilateral Doyle tampon testespit edildi. Stripleme ve atel uygulanarak operasyona son verildi."
+};
+
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
@@ -245,6 +332,14 @@ export default function Home() {
   const [flightData, setFlightData] = useState({ name: "", surgeryDate: "", flightDate: "" });
   const [canFlyDays, setCanFlyDays] = useState<string>("");
 
+  // ID/Passport Report State
+  const [idReportData, setIdReportData] = useState({
+    name: "",
+    surgeryDate: "",
+    reportDate: new Date().toLocaleDateString('tr-TR'),
+    ...PASSPORT_REPORT_TEMPLATE
+  });
+
   // Patient Search State
   const [searchTerm, setSearchTerm] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
@@ -253,14 +348,13 @@ export default function Home() {
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
 
   useEffect(() => {
-    if (activeSubItem === "flight-report" && searchTerm.length >= 3) {
+    if ((activeSubItem === "flight-report" || activeSubItem === "id-report") && searchTerm.length >= 3) {
       if (patients.length === 0) {
         setIsLoadingPatients(true);
         fetch("http://localhost:3010/api/calendar")
           .then(res => res.json())
           .then(data => {
             const list = Array.isArray(data) ? data : [];
-            // Extract unique names from surgery events
             const names = Array.from(new Set(list.map((e: any) => e.title.split('/')[0].trim())))
               .filter(n => n.length > 2)
               .sort();
@@ -292,19 +386,29 @@ export default function Home() {
   }, [flightData.surgeryDate, canFlyDays]);
 
   const isFlightDataValid = flightData.name.length > 2 && flightData.surgeryDate && flightData.flightDate;
+  const isIdDataValid = idReportData.name.length > 2 && idReportData.surgeryDate;
 
   const handlePrint = () => {
     window.print();
   };
 
+  const getActiveTitle = () => {
+    if (activeSubItem === "flight-report") return "Uçuş Raporu";
+    if (activeSubItem === "id-report") return "Kimlik / Pasaport Yenileme Raporu";
+    return selectedCategory?.title || "Asistan Paneli";
+  };
+
   return (
-    <main className="min-h-screen p-4 md:p-8 flex flex-col items-center max-w-[430px] mx-auto bg-slate-950 text-slate-100 print:bg-white print:p-0 print:m-0 print:max-w-none">
-      <div className="print:hidden w-full flex flex-col items-center">
+    <main className="min-h-screen p-4 md:p-8 flex flex-col items-center w-full max-w-7xl mx-auto bg-slate-950 text-slate-100 print:bg-white print:p-0 print:m-0 print:max-w-none">
+      <div className="print:hidden w-full flex flex-col items-center max-w-2xl">
         <header className="w-full text-center mb-12 mt-8">
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
+          <h1
+            onClick={() => { setSelectedCategory(null); setActiveSubItem(null); }}
+            className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+          >
             Op. Dr. İbrahim YAĞCI
           </h1>
-          <p className="text-slate-400 font-medium">Asistan Paneli</p>
+          <p className="text-slate-400 font-medium tracking-wide">Asistan Paneli</p>
         </header>
 
         {!selectedCategory ? (
@@ -313,7 +417,7 @@ export default function Home() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat)}
-                className={`${cat.color} flex items-center justify-between w-full p-6 text-xl font-semibold transition-all rounded-[2rem] border border-white/10 hover:scale-[1.02] active:scale-[0.98] shadow-lg group`}
+                className={`${cat.color} flex items-center justify-between w-full p-6 text-xl font-bold transition-all rounded-[2rem] border border-white/10 hover:scale-[1.02] active:scale-[0.98] shadow-2xl group`}
               >
                 <span className="flex items-center gap-4">
                   {cat.icon}
@@ -325,50 +429,80 @@ export default function Home() {
           </div>
         ) : (
           <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <button
-              onClick={() => {
-                setSelectedCategory(null);
-                setActiveSubItem(null);
-              }}
-              className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Geri Dön
-            </button>
+            <div className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => {
+                  if (activeSubItem) setActiveSubItem(null);
+                  else setSelectedCategory(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900/50 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-all border border-slate-800"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                Geri
+              </button>
 
-            <h2 className="text-2xl font-bold mb-6 text-white border-l-4 border-emerald-500 pl-4">
-              {selectedCategory.title}
+              <button
+                onClick={() => {
+                  setSelectedCategory(null);
+                  setActiveSubItem(null);
+                }}
+                className="flex items-center gap-2 px-5 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 rounded-full font-bold transition-all border border-blue-500/20 shadow-lg"
+              >
+                <HomeIcon className="w-4 h-4" />
+                Ana Sayfa
+              </button>
+            </div>
+
+            <h2 className="text-3xl font-black mb-8 text-white border-l-8 border-emerald-500 pl-6 uppercase tracking-tight">
+              {getActiveTitle()}
             </h2>
 
-            {selectedCategory.id === "raporlar" && !activeSubItem ? (
+            {(selectedCategory.id === "raporlar" || selectedCategory.id === "formlar") && !activeSubItem ? (
               <div className="space-y-4">
-                {selectedCategory.subItems.map((item: any) => (
+                {/* Regular docs for formlar (the PDF link) */}
+                {selectedCategory.docs?.map((doc: any, i: number) => (
+                  <a
+                    key={`doc-${i}`}
+                    href={doc.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-lg"
+                  >
+                    <span className="flex items-center gap-4 text-xl font-bold">
+                      <FileText className="w-6 h-6 text-emerald-500" />
+                      {doc.name}
+                    </span>
+                    <ExternalLink className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                  </a>
+                ))}
+
+                {/* Sub items for interactive forms */}
+                {selectedCategory.subItems?.map((item: any) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveSubItem(item.id)}
-                    className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group"
+                    className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-xl"
                   >
-                    <span className="flex items-center gap-4 text-xl font-medium">
+                    <span className="flex items-center gap-4 text-xl font-bold">
                       {item.icon}
                       {item.title}
                     </span>
-                    <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="w-5 h-5 opacity-0 group-hover:translate-x-1 group-hover:opacity-100 transition-all text-blue-500" />
                   </button>
                 ))}
               </div>
             ) : activeSubItem === "flight-report" ? (
               <div className="space-y-6">
-                <div className="glass-card p-6 border-blue-500/30 space-y-4 shadow-2xl relative">
-                  <div className="space-y-4">
-                    {/* Patient Name with Search */}
+                <div className="glass-card p-8 border-blue-500/30 space-y-6 shadow-2xl relative bg-slate-900/40 rounded-[2.5rem]">
+                  <div className="space-y-6">
                     <div className="relative">
-                      <label className="block text-sm font-medium text-slate-400 mb-2">Hasta İsmi</label>
+                      <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta İsmi</label>
                       <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                         <input
                           type="text"
-                          placeholder="Arama yapın (min. 3 karakter)"
-                          className="w-full bg-slate-800 border-slate-700 rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-white placeholder:text-slate-600"
+                          placeholder="Arama yapın..."
+                          className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl pl-12 pr-4 py-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-white text-lg font-medium"
                           value={searchTerm || flightData.name}
                           onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -377,7 +511,7 @@ export default function Home() {
                         />
                       </div>
                       {showSearch && (
-                        <div className="absolute z-[100] mt-2 w-full bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800">
+                        <div className="absolute z-[100] mt-2 w-full bg-slate-900 border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800">
                           {filteredPatients.map((name, i) => (
                             <button
                               key={i}
@@ -388,8 +522,8 @@ export default function Home() {
                               }}
                               className="w-full p-4 text-left hover:bg-slate-800 flex items-center gap-3 transition-colors"
                             >
-                              <User className="w-4 h-4 text-blue-400" />
-                              <span className="text-slate-200 font-medium">{name}</span>
+                              <User className="w-5 h-5 text-blue-400" />
+                              <span className="text-slate-100 font-bold">{name}</span>
                             </button>
                           ))}
                         </div>
@@ -397,38 +531,35 @@ export default function Home() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Surgery Date */}
                       <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Ameliyat Tarihi</label>
+                        <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Ameliyat Tarihi</label>
                         <input
                           type="date"
-                          className={`w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all ${flightData.surgeryDate ? "bg-emerald-500/10 border-emerald-500/30" : ""}`}
+                          className={`w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-4 focus:border-blue-500 outline-none text-white font-bold transition-all ${flightData.surgeryDate ? "bg-emerald-500/5 border-emerald-500/40 text-emerald-400" : ""}`}
                           value={flightData.surgeryDate}
                           onChange={(e) => setFlightData({ ...flightData, surgeryDate: e.target.value })}
                         />
                       </div>
 
-                      {/* Dropdown Automation */}
                       <div>
-                        <label className="block text-sm font-medium text-blue-400 mb-2">Uçabilir</label>
+                        <label className="block text-sm font-black text-blue-500 uppercase tracking-widest mb-2 ml-2">Gün Seçiniz</label>
                         <select
-                          className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white cursor-pointer"
+                          className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-4 focus:border-blue-500 outline-none text-white font-bold cursor-pointer appearance-none text-lg"
                           value={canFlyDays}
                           onChange={(e) => setCanFlyDays(e.target.value)}
                         >
-                          <option value="">Seçiniz...</option>
+                          <option value="">... gün seçiniz</option>
                           {[1, 2, 3, 4, 5, 6, 7].map(d => (
-                            <option key={d} value={d}>{d} Gün</option>
+                            <option key={d} value={d} className="bg-slate-950">{d} Gün</option>
                           ))}
                         </select>
                       </div>
 
-                      {/* Flight Date */}
                       <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Uçuş Tarihi</label>
+                        <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Uçuş Tarihi</label>
                         <input
                           type="date"
-                          className={`w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all ${flightData.flightDate ? "bg-emerald-500/10 border-emerald-500/30" : ""}`}
+                          className={`w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-4 focus:border-blue-500 outline-none text-white font-bold transition-all ${flightData.flightDate ? "bg-emerald-500/5 border-emerald-500/40 text-emerald-400" : ""}`}
                           value={flightData.flightDate}
                           onChange={(e) => setFlightData({ ...flightData, flightDate: e.target.value })}
                         />
@@ -439,23 +570,106 @@ export default function Home() {
                   <button
                     disabled={!isFlightDataValid}
                     onClick={handlePrint}
-                    className={`w-full py-5 rounded-2xl flex items-center justify-center gap-3 font-bold text-lg transition-all ${isFlightDataValid
-                        ? "bg-blue-600 hover:bg-blue-500 text-white shadow-xl active:scale-95 ring-2 ring-blue-400/20"
-                        : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                    className={`w-full py-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xl transition-all shadow-2xl ${isFlightDataValid
+                        ? "bg-blue-600 hover:bg-blue-500 text-white active:scale-95 hover:shadow-blue-500/20"
+                        : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
                       }`}
                   >
-                    <Printer className="w-6 h-6" />
+                    <Printer className="w-7 h-7" />
                     Belgeyi Yazdır (A4)
                   </button>
                 </div>
 
-                <div className="w-full pt-4">
-                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 ml-4">
-                    Belge Önizleme (A4) / Document Preview
-                  </h4>
-                  <div className="relative">
+                <div className="w-full pt-8">
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
+                    BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
+                  </p>
+                  <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
                     <FlightReportPrintable data={flightData} isPreview={true} />
-                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+            ) : activeSubItem === "id-report" ? (
+              <div className="space-y-6">
+                <div className="glass-card p-8 border-amber-500/30 space-y-6 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta Adı Soyadı</label>
+                      <input
+                        type="text"
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white font-bold"
+                        value={idReportData.name}
+                        onChange={(e) => setIdReportData({ ...idReportData, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Ameliyat Tarihi</label>
+                      <input
+                        type="text"
+                        placeholder="Örn: 11.11.2024"
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white font-bold"
+                        value={idReportData.surgeryDate}
+                        onChange={(e) => setIdReportData({ ...idReportData, surgeryDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Tanı</label>
+                      <textarea
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white text-sm min-h-[60px]"
+                        value={idReportData.diagnosis}
+                        onChange={(e) => setIdReportData({ ...idReportData, diagnosis: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Uygulanan Ameliyat</label>
+                      <input
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white text-sm"
+                        value={idReportData.surgeryPerformed}
+                        onChange={(e) => setIdReportData({ ...idReportData, surgeryPerformed: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Şikayet</label>
+                        <textarea className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-2 text-sm text-white h-20" value={idReportData.complaint} onChange={e => setIdReportData({ ...idReportData, complaint: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hikaye</label>
+                        <textarea className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-2 text-sm text-white h-20" value={idReportData.history} onChange={e => setIdReportData({ ...idReportData, history: e.target.value })} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Ameliyat Notu</label>
+                      <textarea
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white text-xs min-h-[120px]"
+                        value={idReportData.surgeryNote}
+                        onChange={(e) => setIdReportData({ ...idReportData, surgeryNote: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={!isIdDataValid}
+                    onClick={handlePrint}
+                    className={`w-full py-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xl transition-all shadow-2xl ${isIdDataValid
+                        ? "bg-amber-600 hover:bg-amber-500 text-white"
+                        : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
+                      }`}
+                  >
+                    <Printer className="w-7 h-7" />
+                    Raporu Yazdır (A4)
+                  </button>
+                </div>
+
+                <div className="w-full pt-8">
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
+                    BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
+                  </p>
+                  <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
+                    <IDReportPrintable data={idReportData} isPreview={true} />
                   </div>
                 </div>
               </div>
@@ -499,11 +713,11 @@ export default function Home() {
                           href={doc.path}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group block w-full p-5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/50 rounded-2xl transition-all hover:scale-[1.02] flex items-center justify-between"
+                          className="group block w-full p-5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/50 rounded-2xl transition-all hover:scale-[1.02] flex items-center justify-between shadow-md"
                         >
-                          <span className="text-slate-200 font-medium">{doc.name}</span>
+                          <span className="text-slate-200 font-bold">{doc.name}</span>
                           {doc.iconType === "print" ? (
-                            <Printer className="w-6 h-6 text-emerald-500 group-hover:animate-bounce" />
+                            <Printer className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
                           ) : (
                             <FileText className="w-6 h-6 text-emerald-500" />
                           )}
@@ -521,12 +735,13 @@ export default function Home() {
           </div>
         )}
 
-        <footer className="mt-auto py-8 text-center text-slate-600 text-sm">
-          &copy; {new Date().getFullYear()} Dr. İbrahim YAĞCI
+        <footer className="mt-auto py-12 text-center text-slate-600 text-sm font-medium tracking-widest uppercase">
+          &copy; {new Date().getFullYear()} Op. Dr. İbrahim YAĞCI
         </footer>
       </div>
 
       <FlightReportPrintable data={flightData} />
+      <IDReportPrintable data={idReportData} />
     </main>
   );
 }
