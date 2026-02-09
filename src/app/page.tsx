@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing
@@ -81,7 +81,10 @@ const CATEGORIES = [
     icon: <FileText className="w-8 h-8" />,
     color: "bg-emerald-700/80",
     docs: [
-      { name: "Rinoplasti Ameliyatı Bilgilendirme", path: "/documents/bilgilendirme/Rinoplasti Ameliyatı Bilgilendirme  online metin.pdf" }
+      { name: "Hasta Bilgilendirme (pdf)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d1ac4338b4f74882bb5a73997dd2a957.pdf" },
+      { name: "Hast. Bilgilendirme (print)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" },
+      { name: "Postop bilgilendirme fişi", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" },
+      { name: "Rinoplasti Ameliyatı Bilgilendirme (Dahili)", path: "/documents/bilgilendirme/Rinoplasti Ameliyatı Bilgilendirme  online metin.pdf" }
     ]
   },
   {
@@ -89,7 +92,15 @@ const CATEGORIES = [
     title: "Onamlar",
     icon: <ClipboardList className="w-8 h-8" />,
     color: "bg-emerald-700/80",
-    docs: []
+    docs: [
+      { name: "Rinoplasti (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d46035a5987e490ab1aacea811ab8bca.pdf" },
+      { name: "Rinoplasti (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_45f487fa44844cf19e68029bc40a965a.pdf" },
+      { name: "Görsel İçerik Onam Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" },
+      { name: "Revizyon Rinoplasti (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_909ed95a53d947a4ad593ebc1748b6f9.pdf" },
+      { name: "Revizyon Rinoplasti (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1c69cdd05170490e9610e70430dd18b2.pdf" },
+      { name: "Kostal kıkırdak raft (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_6302964bb8ad4c049b8f914deca5513a.pdf" },
+      { name: "Kosta (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_02bbabe6f1754566ae4342f847e2a51d.pdf" }
+    ]
   },
   {
     id: "receteler",
@@ -104,6 +115,15 @@ const CATEGORIES = [
       { name: "Reçete rino | [ESP] Cipro + Cefaks", path: "/documents/receteler/reçete rino | [ESP] Cipro + Cefaks.pdf" },
       { name: "Reçete rino | 2025 CEFAKS Fransızca", path: "/documents/receteler/reçete rino | 2025 CEFAKS Fransızca.pdf" },
       { name: "Reçete rino | 2025 ingilizce", path: "/documents/receteler/reçete rino | 2025 ingilizce.pdf" }
+    ]
+  },
+  {
+    id: "formlar",
+    title: "Formlar",
+    icon: <FileEdit className="w-8 h-8" />,
+    color: "bg-amber-700/80",
+    docs: [
+      { name: "Ameliyat raporu formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
     ]
   },
   {
@@ -197,7 +217,7 @@ export default function Home() {
                     <input
                       type="text"
                       placeholder="Örn: Agustin Enrique Maiso"
-                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-white"
                       value={flightData.name}
                       onChange={(e) => setFlightData({ ...flightData, name: e.target.value })}
                     />
@@ -206,7 +226,7 @@ export default function Home() {
                     <label className="block text-sm font-medium text-slate-400 mb-1">Ameliyat Tarihi</label>
                     <input
                       type="date"
-                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white"
                       value={flightData.surgeryDate}
                       onChange={(e) => setFlightData({ ...flightData, surgeryDate: e.target.value })}
                     />
@@ -215,7 +235,7 @@ export default function Home() {
                     <label className="block text-sm font-medium text-slate-400 mb-1">Uçuş Tarihi</label>
                     <input
                       type="date"
-                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white"
                       value={flightData.flightDate}
                       onChange={(e) => setFlightData({ ...flightData, flightDate: e.target.value })}
                     />
