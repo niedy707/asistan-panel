@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
+ * ENFORCES A4 FORMAT
  */
 const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: string, surgeryDate: string, flightDate: string }, isPreview?: boolean }) => {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "....................";
     try {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
       return new Date(dateStr).toLocaleDateString('tr-TR');
     } catch {
       return dateStr;
@@ -17,107 +20,140 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
   };
 
   const containerClasses = isPreview
-    ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 overflow-hidden font-sans scale-[0.9] origin-top mb-12"
-    : "hidden print:block p-16 bg-white text-black font-sans text-[11pt] leading-relaxed max-w-[21cm] mx-auto";
+    ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 overflow-hidden font-sans scale-[0.85] origin-top mb-12"
+    : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[20mm] mx-auto";
 
   return (
     <div className={containerClasses} id={isPreview ? "preview-report" : "printable-report"}>
-      {/* Header */}
-      <div className="flex flex-col items-center text-center border-b-2 border-slate-900 pb-8 mb-10">
-        <h1 className="text-3xl font-black uppercase tracking-tighter text-slate-900 mb-1">
-          Op. Dr. İbrahim YAĞCI
-        </h1>
-        <div className="flex flex-col gap-0.5 mt-2">
-          <p className="text-[10pt] font-bold text-slate-700 uppercase tracking-widest">
-            Kulak Burun Boğaz ve Baş Boyun Cerrahisi Uzmanı
-          </p>
-          <p className="text-[9pt] italic text-slate-500 font-medium">
-            Otorhinolaryngology - Head and Neck Surgeon
-          </p>
-        </div>
-      </div>
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          #printable-report {
+            display: block !important;
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
 
-      {/* Report Title */}
-      <div className="text-center mb-12">
-        <div className="inline-block px-8 py-2 border-2 border-slate-900 rounded-lg">
-          <h2 className="text-xl font-black uppercase text-slate-950">
+      <div className="h-full flex flex-col border-[0.5pt] border-slate-100 p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-full -z-10 opacity-50"></div>
+
+        <div className="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-12">
+          <div className="text-left">
+            <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950 leading-none mb-2">
+              Op. Dr. İbrahim YAĞCI
+            </h1>
+            <p className="text-[11pt] font-extrabold text-slate-700 uppercase tracking-[0.15em]">
+              Kulak Burun Boğaz ve Baş Boyun Cerrahisi Uzmanı
+            </p>
+            <p className="text-[10pt] italic text-slate-500 font-semibold mt-1">
+              Otorhinolaryngology - Head and Neck Surgeon
+            </p>
+          </div>
+          <div className="bg-slate-900 text-white p-4 rounded-xl text-center min-w-[120px]">
+            <p className="text-[8pt] font-black uppercase tracking-widest opacity-60 mb-1">DOKÜMAN / DOC</p>
+            <p className="text-xl font-bold">FFC-2025</p>
+          </div>
+        </div>
+
+        <div className="text-center mb-16">
+          <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight">
             UÇUŞA ELVERİŞLİLİK RAPORU
           </h2>
-          <div className="h-px bg-slate-400 w-full my-1"></div>
-          <h2 className="text-lg font-bold uppercase text-slate-700">
-            FLIGHT FITNESS CERTIFICATE
-          </h2>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="space-y-10">
-        <div className="relative">
-          <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-4 border-b border-slate-100 pb-2">
-            Hasta Bilgileri / Patient Information
-          </h3>
-          <div className="space-y-6">
-            <p className="text-[12pt] leading-normal text-slate-800">
-              Tarafımıza başvuran <strong>{data.name || "................................................"}</strong>'ın yapılan fiziki muayenesinde, uçak ile seyahat etmesine engel teşkil edecek tıbbi bir bulguya rastlanmamıştır.
-            </p>
-            <p className="text-[11pt] leading-normal text-slate-600 italic border-l-4 border-slate-200 pl-4">
-              We hereby certify that <strong>{data.name || "................................................"}</strong> has been medically examined and is found to be fit for air travel.
-            </p>
+          <div className="flex items-center justify-center gap-4 my-2">
+            <div className="h-[2pt] bg-slate-200 flex-1"></div>
+            <h2 className="text-lg font-bold uppercase text-slate-500 italic">
+              FLIGHT FITNESS CERTIFICATE
+            </h2>
+            <div className="h-[2pt] bg-slate-200 flex-1"></div>
           </div>
         </div>
 
-        {/* Vital Info Grid */}
-        <div className="grid grid-cols-2 gap-0 border border-slate-900 divide-x divide-slate-900 rounded-lg overflow-hidden">
-          <div className="p-4 bg-slate-50/50">
-            <p className="text-[8pt] font-black text-slate-500 uppercase mb-1">Ameliyat Tarihi / Surgery Date</p>
-            <p className="text-xl font-bold text-slate-900">{formatDate(data.surgeryDate)}</p>
+        <div className="flex-1 space-y-12">
+          <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 relative">
+            <div className="absolute -top-3 left-6 bg-slate-900 text-white text-[8pt] font-black px-4 py-1 rounded-full uppercase tracking-widest">
+              HASTA BİLGİLERİ / PATIENT INFO
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
+                <span className="text-slate-500 font-bold uppercase text-xs w-32 shrink-0">İsim / Name:</span>
+                <span className="text-xl font-black text-slate-900 tracking-tight">{data.name || "................................................"}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
+                  <span className="text-slate-500 font-bold uppercase text-xs shrink-0">Ameliyat / Surgery:</span>
+                  <span className="text-lg font-black text-slate-900">{formatDate(data.surgeryDate)}</span>
+                </div>
+                <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
+                  <span className="text-slate-500 font-bold uppercase text-xs shrink-0">Uçuş / Flight:</span>
+                  <span className="text-lg font-black text-slate-900">{formatDate(data.flightDate)}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="p-4 bg-slate-50/50">
-            <p className="text-[8pt] font-black text-slate-500 uppercase mb-1">Uçuş Tarihi / Flight Date</p>
-            <p className="text-xl font-bold text-slate-900">{formatDate(data.flightDate)}</p>
+
+          <div className="space-y-8 px-4">
+            <div className="relative">
+              <p className="text-[13pt] leading-relaxed text-slate-900 text-justify">
+                Sayın <strong>{data.name || "..................."}</strong>'ın yapılan fiziki muayenesi ve tıbbi değerlendirmesi sonucunda, uçak ile seyahat etmesine engel teşkil edecek herhangi bir klinik bulguya rastlanmamıştır.
+              </p>
+              <p className="text-[11pt] leading-relaxed text-slate-500 italic mt-4 text-justify border-l-4 border-slate-200 pl-6">
+                Following the clinical examination and medical evaluation of <strong>{data.name || "..................."}</strong>, no medical contraindications have been found to prevent air travel.
+              </p>
+            </div>
+
+            <div className="mt-12 p-8 bg-slate-950 rounded-3xl text-white shadow-2xl transform">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="bg-emerald-500 p-2 rounded-lg">
+                  <Plane className="w-6 h-6 text-slate-950" />
+                </div>
+                <h4 className="text-lg font-black uppercase tracking-wider text-emerald-400">TIBBİ ONAY / MEDICAL CLEARANCE</h4>
+              </div>
+              <p className="text-[14pt] font-bold leading-snug">
+                <span className="opacity-60 font-medium text-lg">Hastanın</span> <strong>{formatDate(data.flightDate)}</strong> <span className="opacity-60 font-medium text-sm">tarihi itibarı ile uçuş yapmasında sakınca yoktur.</span>
+              </p>
+              <div className="h-px bg-white/10 my-4"></div>
+              <p className="text-[11pt] italic text-slate-400">
+                As of <strong>{formatDate(data.flightDate)}</strong>, the patient is medically cleared for flight. No pathological findings were detected.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Conclusion Statement */}
-        <div className="bg-slate-900 p-6 rounded-xl text-white shadow-lg">
-          <p className="text-[12pt] font-medium leading-relaxed">
-            <span className="text-emerald-400 font-black tracking-wider uppercase mr-2">[ONAY/APPROVED]</span>
-            <strong>{formatDate(data.flightDate)}</strong> tarihi itibarı ile hastanın uçuş yapmasında sakınca yoktur.
-          </p>
-          <div className="h-px bg-white/20 w-full my-3"></div>
-          <p className="text-[10pt] text-slate-300 italic">
-            As of <strong>{formatDate(data.flightDate)}</strong>, there is no medical contraindication for the patient to travel by air.
-          </p>
-        </div>
-      </div>
+        <div className="border-t-2 border-slate-100 pt-12 flex justify-between items-end">
+          <div className="space-y-1">
+            <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Rapor Tarihi / Report Date</p>
+            <p className="text-lg font-bold text-slate-900">{new Date().toLocaleDateString('tr-TR')}</p>
+            <div className="mt-8 text-[7pt] text-slate-300 max-w-[200px] leading-tight font-medium uppercase tracking-[0.1em]">
+              Bu belge Op. Dr. İbrahim Yağcı asistan paneli tarafından dijital olarak doğrulanmıştır.
+            </div>
+          </div>
 
-      {/* Signature & Date Footer */}
-      <div className="mt-24 flex justify-between items-end">
-        <div className="space-y-4">
-          <div className="px-4 py-2 bg-slate-50 rounded italic text-slate-400 text-sm">
-            Rapor Tarihi / Report Date: <span className="text-slate-900 font-bold ml-2">{new Date().toLocaleDateString('tr-TR')}</span>
+          <div className="text-right flex flex-col items-center min-w-[250px] relative">
+            <div className="absolute -top-16 right-0 w-48 h-48 opacity-5 pointer-events-none">
+              <Languages className="w-full h-full text-slate-900" />
+            </div>
+
+            <div className="z-10 text-center">
+              <div className="text-blue-900 font-black text-xl mb-1">Op. Dr. İbrahim YAĞCI</div>
+              <div className="text-blue-800 font-bold text-sm uppercase tracking-widest mb-0.5">KBB ve B.B.C Uzmanı</div>
+              <div className="text-blue-800 text-xs font-semibold">Diploma Tescil No: 182657</div>
+
+              <div className="mt-8 border-t border-slate-200 pt-2">
+                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-[0.3em]">KAŞE - İMZA / STAMP</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="text-center relative">
-          {/* Decorative Stamp Element */}
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 border-4 border-blue-900/10 rounded-full flex items-center justify-center -rotate-12 pointer-events-none">
-            <div className="border border-blue-900/5 w-full h-full rounded-full m-1"></div>
-          </div>
-
-          <div className="relative z-10 text-blue-900">
-            <div className="font-black text-[13pt] leading-tight mb-1">Op. Dr. İbrahim YAĞCI</div>
-            <div className="text-[10pt] font-bold uppercase tracking-widest">KBB ve B.B.C Uzmanı</div>
-            <div className="text-[9pt] font-medium">Diploma Tescil No: 182657</div>
-          </div>
-          <div className="mt-6 border-t border-slate-200 pt-2 text-[8pt] font-black text-slate-400 uppercase tracking-widest">
-            Kaşe - İmza / Stamp - Signature
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-16 text-center text-[8pt] text-slate-300 italic border-t border-slate-50 pt-4">
-        This document is an official medical statement issued via the digital assistant portal.
       </div>
     </div>
   );
@@ -130,10 +166,9 @@ const CATEGORIES = [
     icon: <FileText className="w-8 h-8" />,
     color: "bg-emerald-700/80",
     docs: [
-      { name: "Hasta Bilgilendirme (pdf)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d1ac4338b4f74882bb5a73997dd2a957.pdf" },
-      { name: "Hast. Bilgilendirme (print)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" },
-      { name: "Postop bilgilendirme fişi", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" },
-      { name: "Rinoplasti Ameliyatı Bilgilendirme (Dahili)", path: "/documents/bilgilendirme/Rinoplasti Ameliyatı Bilgilendirme  online metin.pdf" }
+      { name: "Hasta Bilgilendirme", iconType: "pdf", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d1ac4338b4f74882bb5a73997dd2a957.pdf" },
+      { name: "Hasta Bilgilendirme (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" },
+      { name: "Postop Bilgilendirme Fişi (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" }
     ]
   },
   {
@@ -142,13 +177,28 @@ const CATEGORIES = [
     icon: <ClipboardList className="w-8 h-8" />,
     color: "bg-emerald-700/80",
     docs: [
-      { name: "Rinoplasti (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d46035a5987e490ab1aacea811ab8bca.pdf" },
-      { name: "Rinoplasti (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_45f487fa44844cf19e68029bc40a965a.pdf" },
-      { name: "Görsel İçerik Onam Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" },
-      { name: "Revizyon Rinoplasti (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_909ed95a53d947a4ad593ebc1748b6f9.pdf" },
-      { name: "Revizyon Rinoplasti (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1c69cdd05170490e9610e70430dd18b2.pdf" },
-      { name: "Kostal kıkırdak raft (Türkçe)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_6302964bb8ad4c049b8f914deca5513a.pdf" },
-      { name: "Kosta (İng)", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_02bbabe6f1754566ae4342f847e2a51d.pdf" }
+      {
+        name: "Rinoplasti",
+        langs: [
+          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d46035a5987e490ab1aacea811ab8bca.pdf" },
+          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_45f487fa44844cf19e68029bc40a965a.pdf" }
+        ]
+      },
+      {
+        name: "Revizyon Rinoplasti",
+        langs: [
+          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_909ed95a53d947a4ad593ebc1748b6f9.pdf" },
+          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1c69cdd05170490e9610e70430dd18b2.pdf" }
+        ]
+      },
+      {
+        name: "Kostal Kıkırdak (Kosta)",
+        langs: [
+          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_6302964bb8ad4c049b8f914deca5513a.pdf" },
+          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_02bbabe6f1754566ae4342f847e2a51d.pdf" }
+        ]
+      },
+      { name: "Görsel İçerik Onam Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" }
     ]
   },
   {
@@ -172,7 +222,7 @@ const CATEGORIES = [
     icon: <FileEdit className="w-8 h-8" />,
     color: "bg-amber-700/80",
     docs: [
-      { name: "Ameliyat raporu formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
+      { name: "Ameliyat Raporu Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
     ]
   },
   {
@@ -189,10 +239,9 @@ const CATEGORIES = [
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
+  const [hoveredDoc, setHoveredDoc] = useState<string | null>(null);
 
-  // Flight Report State
   const [flightData, setFlightData] = useState({ name: "", surgeryDate: "", flightDate: "" });
-
   const isFlightDataValid = flightData.name.length > 2 && flightData.surgeryDate && flightData.flightDate;
 
   const handlePrint = () => {
@@ -298,12 +347,12 @@ export default function Home() {
                     disabled={!isFlightDataValid}
                     onClick={handlePrint}
                     className={`w-full py-5 rounded-2xl flex items-center justify-center gap-3 font-bold text-lg transition-all ${isFlightDataValid
-                        ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl active:scale-95 ring-2 ring-emerald-400/20"
+                        ? "bg-blue-600 hover:bg-blue-500 text-white shadow-xl active:scale-95 ring-2 ring-blue-400/20"
                         : "bg-slate-800 text-slate-500 cursor-not-allowed"
                       }`}
                   >
                     <Printer className="w-6 h-6" />
-                    Belgeyi Yazdır
+                    Belgeyi Yazdır (A4)
                   </button>
 
                   {!isFlightDataValid && (
@@ -313,31 +362,67 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Live Preview Section */}
                 <div className="w-full pt-4">
                   <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 ml-4">
-                    Belge Önizleme / Document Preview
+                    Belge Önizleme (A4) / Document Preview
                   </h4>
                   <div className="relative">
                     <FlightReportPrintable data={flightData} isPreview={true} />
-                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {selectedCategory.docs?.length > 0 ? (
                   selectedCategory.docs.map((doc: any, idx: number) => (
-                    <a
+                    <div
                       key={idx}
-                      href={doc.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full p-5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/50 rounded-2xl transition-all hover:translate-x-2 flex items-center justify-between"
+                      className="relative"
+                      onMouseEnter={() => doc.langs && setHoveredDoc(doc.name)}
+                      onMouseLeave={() => setHoveredDoc(null)}
                     >
-                      <span className="text-slate-200 font-medium">{doc.name}</span>
-                      <FileText className="w-5 h-5 text-emerald-500" />
-                    </a>
+                      {doc.langs ? (
+                        <div className="flex flex-col gap-2">
+                          <div className={`w-full p-5 bg-slate-900 border transition-all duration-300 rounded-2xl flex items-center justify-between ${hoveredDoc === doc.name ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'border-slate-800'}`}>
+                            <span className="text-slate-100 font-bold text-lg">{doc.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9pt] font-black uppercase tracking-widest text-emerald-500/60">DİL SEÇİN</span>
+                              <Languages className="w-5 h-5 text-emerald-500 animate-pulse" />
+                            </div>
+                          </div>
+
+                          <div className={`grid grid-cols-2 gap-3 transition-all duration-300 ${hoveredDoc === doc.name ? 'opacity-100 translate-y-0 max-h-40' : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none overflow-hidden'}`}>
+                            {doc.langs.map((l: any, i: number) => (
+                              <a
+                                key={i}
+                                href={l.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 p-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-black text-white transition-all shadow-lg active:scale-95 border border-emerald-400/30"
+                              >
+                                {l.label}
+                                <ExternalLink className="w-4 h-4 opacity-50" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <a
+                          href={doc.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group block w-full p-5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/50 rounded-2xl transition-all hover:scale-[1.02] flex items-center justify-between"
+                        >
+                          <span className="text-slate-200 font-medium">{doc.name}</span>
+                          {doc.iconType === "print" ? (
+                            <Printer className="w-6 h-6 text-emerald-500 group-hover:animate-bounce" />
+                          ) : (
+                            <FileText className="w-6 h-6 text-emerald-500" />
+                          )}
+                        </a>
+                      )}
+                    </div>
                   ))
                 ) : (
                   <div className="text-center py-12 text-slate-500 glass-card">
