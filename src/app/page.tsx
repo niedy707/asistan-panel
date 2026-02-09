@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
@@ -11,6 +11,7 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "....................";
     try {
+      if (dateStr.includes('.')) return dateStr;
       const parts = dateStr.split('-');
       if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
       return new Date(dateStr).toLocaleDateString('tr-TR');
@@ -167,12 +168,24 @@ const IDReportPrintable = ({ data, isPreview = false }: { data: any, isPreview?:
     ? "w-full mt-8 p-12 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 font-sans aspect-[210/297] mb-12 overflow-y-auto"
     : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[20mm] mx-auto";
 
+  const formatDateTR = (dateStr: string) => {
+    if (!dateStr) return "....................";
+    try {
+      if (dateStr.includes('.')) return dateStr;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      return new Date(dateStr).toLocaleDateString('tr-TR');
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className={containerClasses} id={isPreview ? "preview-id-report" : "printable-id-report"}>
       <div className="h-full flex flex-col">
         <div className="space-y-4 mb-4">
           <p className="font-bold text-base">Hasta Adı Soyadı: <span className="underline decoration-slate-300 underline-offset-4">{data.name || "..................."}</span></p>
-          <p className="font-bold text-base">Ameliyat Tarihi: <span className="underline decoration-slate-300 underline-offset-4">{data.surgeryDate || "..................."}</span></p>
+          <p className="font-bold text-base">Ameliyat Tarihi: <span className="underline decoration-slate-300 underline-offset-4">{formatDateTR(data.surgeryDate)}</span></p>
         </div>
 
         <div className="space-y-6 flex-1 text-[13px] leading-relaxed">
@@ -241,8 +254,7 @@ const CATEGORIES = [
     color: "bg-emerald-700/80",
     docs: [
       { name: "Hasta Bilgilendirme", iconType: "pdf", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d1ac4338b4f74882bb5a73997dd2a957.pdf" },
-      { name: "Hasta Bilgilendirme (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" },
-      { name: "Postop Bilgilendirme Fişi (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" }
+      { name: "Hasta Bilgilendirme (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" }
     ]
   },
   {
@@ -296,10 +308,8 @@ const CATEGORIES = [
     icon: <FileEdit className="w-8 h-8" />,
     color: "bg-amber-700/80",
     docs: [
-      { name: "Ameliyat Raporu Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
-    ],
-    subItems: [
-      { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> }
+      { name: "Postop Bilgilendirme Fişi (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" },
+      { name: "Ameliyat Raporu Formu", iconType: "pdf", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
     ]
   },
   {
@@ -308,7 +318,8 @@ const CATEGORIES = [
     icon: <BarChart3 className="w-8 h-8" />,
     color: "bg-blue-700/80",
     subItems: [
-      { id: "flight-report", title: "Uçuş Raporu", icon: <Plane className="w-6 h-6" /> }
+      { id: "flight-report", title: "Uçuş Raporu", icon: <Plane className="w-6 h-6" /> },
+      { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> }
     ]
   }
 ];
@@ -321,6 +332,12 @@ const PASSPORT_REPORT_TEMPLATE = {
   examination: "Septum deviye, nazal valv yetmezliği mevcut. tip pitotik hump+",
   followUp: "Septorinoplasti operasyonu yapılan ve takibinde sorun olmayan hasta 1 hafta sonra kontrole gelmek üzere önerilerle taburcu edildi.",
   surgeryNote: "GAA ETentübasyon sonrası infiltrasyon anestezisini takiben operasyona başlandı. Goodmanın ters W insizyonu sonrası cilt flebi naziona kadar eleve edildi. ASAdan septuma ulaşılarak her iki tarafta mukoprikondrial flep eleve edildi. Dorsum redükte edildi, törpülenerek düzensizlikler giderildi. Sefalik rezeksiyon sonrası Tip definisyonu yapıldı. Deviye septum ve nazal taban çıkartıldı, septoplasti yapıldı. Median-oblik ve internal lateral osteotomiler yapıldı. Orta çatı onarıldı. Tip eşitleme suturu sonrası kolumellar strut yerleştirildi. İnsizyon suture edildi. Bilateral Doyle tampon testespit edildi. Stripleme ve atel uygulanarak operasyona son verildi."
+};
+
+const toTitleCaseTr = (str: string) => {
+  return str.toLocaleLowerCase('tr-TR').split(' ').map(word => {
+    return word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1);
+  }).join(' ');
 };
 
 export default function Home() {
@@ -345,37 +362,73 @@ export default function Home() {
   const [patients, setPatients] = useState<any[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if ((activeSubItem === "flight-report" || activeSubItem === "id-report") && searchTerm.length >= 3) {
-      if (patients.length === 0) {
-        setIsLoadingPatients(true);
-        fetch("http://localhost:3010/api/calendar")
-          .then(res => res.json())
-          .then(data => {
-            const list = Array.isArray(data) ? data : [];
-            const names = Array.from(new Set(list.map((e: any) => e.title.split('/')[0].trim())))
-              .filter(n => n.length > 2)
-              .sort();
-            setPatients(names);
-            setIsLoadingPatients(false);
-          })
-          .catch(err => {
-            console.error("Fetch patients failed:", err);
-            setIsLoadingPatients(false);
-          });
+    // Click outside listener for dropdown
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+        if (!searchTerm) setShowSearch(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    // Initial fetch of patients from local API (synced)
+    if ((activeSubItem === "flight-report" || activeSubItem === "id-report") && patients.length === 0) {
+      setIsLoadingPatients(true);
+      fetch("/api/patients")
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setPatients(data);
+          }
+          setIsLoadingPatients(false);
+        })
+        .catch(err => {
+          console.error("Fetch patients failed:", err);
+          setIsLoadingPatients(false);
+        });
+    }
+  }, [activeSubItem, patients.length]);
+
+  useEffect(() => {
+    // Search & Filter Logic
+    if (activeSubItem === "flight-report" || activeSubItem === "id-report") {
+      let results = patients;
+
+      // 1. Filter by Search Term (if exists)
+      if (searchTerm.length >= 2) {
+        const query = searchTerm.toLocaleLowerCase('tr-TR');
+        results = results.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(query));
       }
 
-      const filtered = patients.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()));
-      setFilteredPatients(filtered);
-      setShowSearch(filtered.length > 0);
+      // 2. Filter by Context (Flight Report = Last 30 Days)
+      if (activeSubItem === "flight-report") {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        results = results.filter(p => new Date(p.surgeryDate) >= thirtyDaysAgo);
+      }
+
+      setFilteredPatients(results);
+
+      // Show if searching OR dropdown is toggled
+      if ((searchTerm.length >= 2) || showDropdown) {
+        setShowSearch(results.length > 0);
+      } else {
+        setShowSearch(false);
+      }
     } else {
       setShowSearch(false);
     }
-  }, [searchTerm, activeSubItem, patients]);
+  }, [searchTerm, activeSubItem, patients, showDropdown]);
 
-  // Automated date calculation
+  // Automated flight date calculation
   useEffect(() => {
     if (flightData.surgeryDate && canFlyDays) {
       const date = new Date(flightData.surgeryDate);
@@ -459,7 +512,6 @@ export default function Home() {
 
             {(selectedCategory.id === "raporlar" || selectedCategory.id === "formlar") && !activeSubItem ? (
               <div className="space-y-4">
-                {/* Regular docs for formlar (the PDF link) */}
                 {selectedCategory.docs?.map((doc: any, i: number) => (
                   <a
                     key={`doc-${i}`}
@@ -469,14 +521,13 @@ export default function Home() {
                     className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-lg"
                   >
                     <span className="flex items-center gap-4 text-xl font-bold">
-                      <FileText className="w-6 h-6 text-emerald-500" />
+                      {doc.iconType === "print" ? <Printer className="w-6 h-6 text-emerald-500" /> : <FileText className="w-6 h-6 text-emerald-500" />}
                       {doc.name}
                     </span>
                     <ExternalLink className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
                   </a>
                 ))}
 
-                {/* Sub items for interactive forms */}
                 {selectedCategory.subItems?.map((item: any) => (
                   <button
                     key={item.id}
@@ -495,35 +546,51 @@ export default function Home() {
               <div className="space-y-6">
                 <div className="glass-card p-8 border-blue-500/30 space-y-6 shadow-2xl relative bg-slate-900/40 rounded-[2.5rem]">
                   <div className="space-y-6">
-                    <div className="relative">
+                    <div className="relative" ref={dropdownRef}>
                       <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta İsmi</label>
-                      <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <div className="relative flex items-center">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 z-10" />
                         <input
                           type="text"
                           placeholder="Arama yapın..."
-                          className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl pl-12 pr-4 py-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-white text-lg font-medium"
+                          className="w-full bg-slate-950 border-2 border-slate-800 rounded-l-2xl rounded-r-none pl-12 pr-4 py-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-white text-lg font-medium"
                           value={searchTerm || flightData.name}
                           onChange={(e) => {
                             setSearchTerm(e.target.value);
                             setFlightData({ ...flightData, name: e.target.value });
+                            setShowDropdown(true);
                           }}
+                          onFocus={() => setShowDropdown(true)}
                         />
+                        <button
+                          onClick={() => setShowDropdown(!showDropdown)}
+                          className="bg-slate-800 border-2 border-l-0 border-slate-800 rounded-r-2xl px-4 py-4 h-full hover:bg-slate-700 transition-colors flex items-center justify-center group"
+                        >
+                          <ChevronLeft className={`w-6 h-6 text-slate-400 transition-transform duration-300 ${showDropdown ? '-rotate-90' : 'rotate-90'}`} />
+                        </button>
                       </div>
+
                       {showSearch && (
-                        <div className="absolute z-[100] mt-2 w-full bg-slate-900 border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800">
-                          {filteredPatients.map((name, i) => (
+                        <div className="absolute z-[100] mt-2 w-full bg-slate-900 border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800 max-h-[300px] overflow-y-auto custom-scrollbar">
+                          {filteredPatients.map((p, i) => (
                             <button
                               key={i}
                               onClick={() => {
-                                setFlightData({ ...flightData, name });
+                                const formattedName = toTitleCaseTr(p.name);
+                                setFlightData({ ...flightData, name: formattedName, surgeryDate: p.surgeryDate });
                                 setSearchTerm("");
                                 setShowSearch(false);
+                                setShowDropdown(false);
                               }}
-                              className="w-full p-4 text-left hover:bg-slate-800 flex items-center gap-3 transition-colors"
+                              className="w-full p-4 text-left hover:bg-slate-800 flex items-center justify-between transition-colors group"
                             >
-                              <User className="w-5 h-5 text-blue-400" />
-                              <span className="text-slate-100 font-bold">{name}</span>
+                              <div className="flex items-center gap-3">
+                                <User className="w-5 h-5 text-blue-400 group-hover:text-blue-300" />
+                                <span className="text-slate-100 font-bold text-lg">{p.name}</span>
+                                <span className="text-slate-500 font-bold text-sm ml-2 bg-slate-800/50 px-2 py-0.5 rounded-md group-hover:bg-slate-700/50 transition-colors">
+                                  {p.surgeryDate.split('-').reverse().join('.')}
+                                </span>
+                              </div>
                             </button>
                           ))}
                         </div>
@@ -571,8 +638,8 @@ export default function Home() {
                     disabled={!isFlightDataValid}
                     onClick={handlePrint}
                     className={`w-full py-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xl transition-all shadow-2xl ${isFlightDataValid
-                        ? "bg-blue-600 hover:bg-blue-500 text-white active:scale-95 hover:shadow-blue-500/20"
-                        : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
+                      ? "bg-blue-600 hover:bg-blue-500 text-white"
+                      : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
                       }`}
                   >
                     <Printer className="w-7 h-7" />
@@ -592,16 +659,58 @@ export default function Home() {
             ) : activeSubItem === "id-report" ? (
               <div className="space-y-6">
                 <div className="glass-card p-8 border-amber-500/30 space-y-6 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta Adı Soyadı</label>
+                  <div className="relative" ref={dropdownRef}>
+                    <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta Adı Soyadı</label>
+                    <div className="relative flex items-center">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 z-10" />
                       <input
                         type="text"
-                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white font-bold"
-                        value={idReportData.name}
-                        onChange={(e) => setIdReportData({ ...idReportData, name: e.target.value })}
+                        placeholder="Arama yapın..."
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-l-2xl rounded-r-none pl-12 pr-4 py-4 focus:border-amber-500 outline-none transition-all text-white text-lg font-bold"
+                        value={searchTerm || idReportData.name}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setIdReportData({ ...idReportData, name: e.target.value });
+                          setShowDropdown(true);
+                        }}
+                        onFocus={() => setShowDropdown(true)}
                       />
+                      <button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="bg-slate-800 border-2 border-l-0 border-slate-800 rounded-r-2xl px-4 py-4 h-full hover:bg-slate-700 transition-colors flex items-center justify-center group"
+                      >
+                        <ChevronLeft className={`w-6 h-6 text-slate-400 transition-transform duration-300 ${showDropdown ? '-rotate-90' : 'rotate-90'}`} />
+                      </button>
                     </div>
+
+                    {showSearch && (
+                      <div className="absolute z-[100] mt-2 w-full bg-slate-900 border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800 max-h-[300px] overflow-y-auto custom-scrollbar">
+                        {filteredPatients.map((p, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              const formattedName = toTitleCaseTr(p.name);
+                              setIdReportData({ ...idReportData, name: formattedName, surgeryDate: p.surgeryDate });
+                              setSearchTerm("");
+                              setShowSearch(false);
+                              setShowDropdown(false);
+                            }}
+                            className="w-full p-4 text-left hover:bg-slate-800 flex items-center justify-between transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <User className="w-5 h-5 text-amber-400 group-hover:text-amber-300" />
+                              <span className="text-slate-100 font-bold text-lg">{p.name}</span>
+                              <span className="text-slate-500 font-bold text-sm ml-2 bg-slate-800/50 px-2 py-0.5 rounded-md group-hover:bg-slate-700/50 transition-colors">
+                                {p.surgeryDate.split('-').reverse().join('.')}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Ameliyat Tarihi</label>
                       <input
@@ -610,6 +719,15 @@ export default function Home() {
                         className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white font-bold"
                         value={idReportData.surgeryDate}
                         onChange={(e) => setIdReportData({ ...idReportData, surgeryDate: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Düzenleme Tarihi</label>
+                      <input
+                        type="text"
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-amber-500 outline-none text-white font-bold"
+                        value={idReportData.reportDate}
+                        onChange={(e) => setIdReportData({ ...idReportData, reportDate: e.target.value })}
                       />
                     </div>
                   </div>
@@ -655,8 +773,8 @@ export default function Home() {
                     disabled={!isIdDataValid}
                     onClick={handlePrint}
                     className={`w-full py-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xl transition-all shadow-2xl ${isIdDataValid
-                        ? "bg-amber-600 hover:bg-amber-500 text-white"
-                        : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
+                      ? "bg-amber-600 hover:bg-amber-500 text-white"
+                      : "bg-slate-800 text-slate-600 cursor-not-allowed opacity-50"
                       }`}
                   >
                     <Printer className="w-7 h-7" />
@@ -700,10 +818,10 @@ export default function Home() {
                                 href={l.path}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 p-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-black text-white transition-all shadow-lg active:scale-95 border border-emerald-400/30"
+                                className="p-3 bg-slate-800/80 hover:bg-emerald-600 text-slate-300 hover:text-white rounded-xl flex items-center justify-between transition-colors text-sm font-bold group/lang"
                               >
                                 {l.label}
-                                <ExternalLink className="w-4 h-4 opacity-50" />
+                                <ExternalLink className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
                               </a>
                             ))}
                           </div>
@@ -713,35 +831,33 @@ export default function Home() {
                           href={doc.path}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group block w-full p-5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/50 rounded-2xl transition-all hover:scale-[1.02] flex items-center justify-between shadow-md"
+                          className="w-full p-5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-sm hover:shadow-lg"
                         >
-                          <span className="text-slate-200 font-bold">{doc.name}</span>
-                          {doc.iconType === "print" ? (
-                            <Printer className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-                          ) : (
-                            <FileText className="w-6 h-6 text-emerald-500" />
-                          )}
+                          <span className="flex items-center gap-4 text-lg font-bold">
+                            {doc.iconType === "print" ? (
+                              <Printer className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            ) : doc.iconType === "pdf" ? (
+                              <FileText className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            ) : (
+                              <FileText className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            )}
+                            {doc.name}
+                          </span>
+                          <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-white transition-colors" />
                         </a>
                       )}
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500 glass-card">
-                    Henüz belge yüklenmemiş.
-                  </div>
+                  <p className="text-slate-500 bg-slate-900 p-8 rounded-[2rem] text-center italic">
+                    Bu kategoride henüz belge bulunmamaktadır.
+                  </p>
                 )}
               </div>
             )}
           </div>
         )}
-
-        <footer className="mt-auto py-12 text-center text-slate-600 text-sm font-medium tracking-widest uppercase">
-          &copy; {new Date().getFullYear()} Op. Dr. İbrahim YAĞCI
-        </footer>
       </div>
-
-      <FlightReportPrintable data={flightData} />
-      <IDReportPrintable data={idReportData} />
     </main>
   );
 }
