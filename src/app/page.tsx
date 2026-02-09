@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
@@ -198,7 +198,7 @@ const CATEGORIES = [
           { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_02bbabe6f1754566ae4342f847e2a51d.pdf" }
         ]
       },
-      { name: "Görsel İçerik Onam Formu", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" }
+      { name: "Görsel içerik işleme onamı", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" }
     ]
   },
   {
@@ -241,7 +241,56 @@ export default function Home() {
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
   const [hoveredDoc, setHoveredDoc] = useState<string | null>(null);
 
+  // Flight Report State
   const [flightData, setFlightData] = useState({ name: "", surgeryDate: "", flightDate: "" });
+  const [canFlyDays, setCanFlyDays] = useState<string>("");
+
+  // Patient Search State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [patients, setPatients] = useState<any[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+
+  useEffect(() => {
+    if (activeSubItem === "flight-report" && searchTerm.length >= 3) {
+      if (patients.length === 0) {
+        setIsLoadingPatients(true);
+        fetch("http://localhost:3010/api/calendar")
+          .then(res => res.json())
+          .then(data => {
+            const list = Array.isArray(data) ? data : [];
+            // Extract unique names from surgery events
+            const names = Array.from(new Set(list.map((e: any) => e.title.split('/')[0].trim())))
+              .filter(n => n.length > 2)
+              .sort();
+            setPatients(names);
+            setIsLoadingPatients(false);
+          })
+          .catch(err => {
+            console.error("Fetch patients failed:", err);
+            setIsLoadingPatients(false);
+          });
+      }
+
+      const filtered = patients.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()));
+      setFilteredPatients(filtered);
+      setShowSearch(filtered.length > 0);
+    } else {
+      setShowSearch(false);
+    }
+  }, [searchTerm, activeSubItem, patients]);
+
+  // Automated date calculation
+  useEffect(() => {
+    if (flightData.surgeryDate && canFlyDays) {
+      const date = new Date(flightData.surgeryDate);
+      date.setDate(date.getDate() + parseInt(canFlyDays));
+      const formattedDate = date.toISOString().split('T')[0];
+      setFlightData(prev => ({ ...prev, flightDate: formattedDate }));
+    }
+  }, [flightData.surgeryDate, canFlyDays]);
+
   const isFlightDataValid = flightData.name.length > 2 && flightData.surgeryDate && flightData.flightDate;
 
   const handlePrint = () => {
@@ -309,33 +358,77 @@ export default function Home() {
               </div>
             ) : activeSubItem === "flight-report" ? (
               <div className="space-y-6">
-                <div className="glass-card p-6 border-blue-500/30 space-y-4 shadow-2xl">
+                <div className="glass-card p-6 border-blue-500/30 space-y-4 shadow-2xl relative">
                   <div className="space-y-4">
-                    <div>
+                    {/* Patient Name with Search */}
+                    <div className="relative">
                       <label className="block text-sm font-medium text-slate-400 mb-2">Hasta İsmi</label>
-                      <input
-                        type="text"
-                        placeholder="Örn: Agustin Enrique Maiso"
-                        className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-white placeholder:text-slate-600"
-                        value={flightData.name}
-                        onChange={(e) => setFlightData({ ...flightData, name: e.target.value })}
-                      />
+                      <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input
+                          type="text"
+                          placeholder="Arama yapın (min. 3 karakter)"
+                          className="w-full bg-slate-800 border-slate-700 rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-white placeholder:text-slate-600"
+                          value={searchTerm || flightData.name}
+                          onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setFlightData({ ...flightData, name: e.target.value });
+                          }}
+                        />
+                      </div>
+                      {showSearch && (
+                        <div className="absolute z-[100] mt-2 w-full bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800">
+                          {filteredPatients.map((name, i) => (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                setFlightData({ ...flightData, name });
+                                setSearchTerm("");
+                                setShowSearch(false);
+                              }}
+                              className="w-full p-4 text-left hover:bg-slate-800 flex items-center gap-3 transition-colors"
+                            >
+                              <User className="w-4 h-4 text-blue-400" />
+                              <span className="text-slate-200 font-medium">{name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Surgery Date */}
                       <div>
                         <label className="block text-sm font-medium text-slate-400 mb-2">Ameliyat Tarihi</label>
                         <input
                           type="date"
-                          className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white"
+                          className={`w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all ${flightData.surgeryDate ? "bg-emerald-500/10 border-emerald-500/30" : ""}`}
                           value={flightData.surgeryDate}
                           onChange={(e) => setFlightData({ ...flightData, surgeryDate: e.target.value })}
                         />
                       </div>
+
+                      {/* Dropdown Automation */}
+                      <div>
+                        <label className="block text-sm font-medium text-blue-400 mb-2">Uçabilir</label>
+                        <select
+                          className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white cursor-pointer"
+                          value={canFlyDays}
+                          onChange={(e) => setCanFlyDays(e.target.value)}
+                        >
+                          <option value="">Seçiniz...</option>
+                          {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                            <option key={d} value={d}>{d} Gün</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Flight Date */}
                       <div>
                         <label className="block text-sm font-medium text-slate-400 mb-2">Uçuş Tarihi</label>
                         <input
                           type="date"
-                          className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white"
+                          className={`w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-white transition-all ${flightData.flightDate ? "bg-emerald-500/10 border-emerald-500/30" : ""}`}
                           value={flightData.flightDate}
                           onChange={(e) => setFlightData({ ...flightData, flightDate: e.target.value })}
                         />
@@ -354,12 +447,6 @@ export default function Home() {
                     <Printer className="w-6 h-6" />
                     Belgeyi Yazdır (A4)
                   </button>
-
-                  {!isFlightDataValid && (
-                    <p className="text-[10pt] text-center text-blue-400/60 bg-blue-500/5 py-3 rounded-lg border border-blue-500/10 italic">
-                      Lütfen tüm alanları doldurun.
-                    </p>
-                  )}
                 </div>
 
                 <div className="w-full pt-4">
