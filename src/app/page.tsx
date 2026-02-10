@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X, Globe } from "lucide-react";
+import { postOpContent } from "@/lib/postOpContent";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
@@ -22,11 +23,13 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
 
   const containerClasses = isPreview
     ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 font-sans aspect-[210/297] mb-12"
-    : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[20mm] mx-auto";
+    : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[10mm] mx-auto";
 
   return (
     <div className={containerClasses} id={isPreview ? "preview-report" : "printable-report"}>
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
+        
         @media print {
           @page {
             size: A4;
@@ -48,46 +51,52 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
       <div className="h-full flex flex-col border-[0.5pt] border-slate-100 p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-full -z-10 opacity-50"></div>
 
-        <div className="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-12">
+        <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
           <div className="text-left">
-            <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950 leading-none mb-2">
+            <h1 className="text-4xl font-black text-slate-950 leading-none mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
               Op. Dr. İbrahim YAĞCI
             </h1>
-            <p className="text-[11pt] font-extrabold text-slate-700 uppercase tracking-[0.15em]">
-              Kulak Burun Boğaz ve Baş Boyun Cerrahisi Uzmanı
+            <p className="text-[11pt] font-extrabold text-slate-700 uppercase tracking-wide">
+              Kulak Burun Boğaz Uzmanı & Rinoplasti
             </p>
             <p className="text-[10pt] italic text-slate-500 font-semibold mt-1">
-              Otorhinolaryngology - Head and Neck Surgeon
+              Otorhinolaryngology & Rhinoplasty Surgeon
             </p>
           </div>
-          <div className="bg-slate-900 text-white p-4 rounded-xl text-center min-w-[120px]">
-            <p className="text-[8pt] font-black uppercase tracking-widest opacity-60 mb-1">DOKÜMAN / DOC</p>
-            <p className="text-xl font-bold">FFC-2025</p>
+          <div className="text-right pt-2">
+            <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Rapor Tarihi / Report Date</p>
+            <p className="text-lg font-bold text-slate-900">{new Date().toLocaleDateString('tr-TR')}</p>
           </div>
         </div>
 
-        <div className="text-center mb-16">
+
+
+        <div className="text-center mb-8">
           <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight">
-            UÇUŞA ELVERİŞLİLİK RAPORU
+            UÇUŞA UYGUNLUK RAPORU
           </h2>
-          <div className="flex items-center justify-center gap-4 my-2">
-            <div className="h-[2pt] bg-slate-200 flex-1"></div>
+          <div className="flex items-center justify-center gap-4 my-1">
+            <div className="h-[1pt] bg-slate-200 flex-1"></div>
             <h2 className="text-lg font-bold uppercase text-slate-500 italic">
-              FLIGHT FITNESS CERTIFICATE
+              AIRWORTHINESS REPORT
             </h2>
-            <div className="h-[2pt] bg-slate-200 flex-1"></div>
+            <div className="h-[1pt] bg-slate-200 flex-1"></div>
           </div>
         </div>
 
-        <div className="flex-1 space-y-12">
-          <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 relative">
+        <div className="flex-1 space-y-6">
+          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
             <div className="absolute -top-3 left-6 bg-slate-900 text-white text-[8pt] font-black px-4 py-1 rounded-full uppercase tracking-widest">
               HASTA BİLGİLERİ / PATIENT INFO
             </div>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
                 <span className="text-slate-500 font-bold uppercase text-xs w-32 shrink-0">İsim / Name:</span>
                 <span className="text-xl font-black text-slate-900 tracking-tight">{data.name || "................................................"}</span>
+              </div>
+              <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
+                <span className="text-slate-500 font-bold uppercase text-xs w-32 shrink-0">Yapılan ameliyat:</span>
+                <span className="text-lg font-black text-slate-900">Rinoplasti <span className="text-slate-400 font-bold ml-2 italic">/ Surgery performed: Rhinoplasty</span></span>
               </div>
               <div className="grid grid-cols-2 gap-8">
                 <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
@@ -102,57 +111,174 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
             </div>
           </div>
 
-          <div className="space-y-8 px-4">
+          <div className="space-y-6 px-4">
             <div className="relative">
               <p className="text-[13pt] leading-relaxed text-slate-900 text-justify">
-                Sayın <strong>{data.name || "..................."}</strong>'ın yapılan fiziki muayenesi ve tıbbi değerlendirmesi sonucunda, uçak ile seyahat etmesine engel teşkil edecek herhangi bir klinik bulguya rastlanmamıştır.
+                Sayın <strong>{data.name || "..................."}</strong>'ın yapılan kontrol muayenesi ve tıbbi değerlendirmesi sonucunda, uçak ile seyahat etmesine engel teşkil edecek herhangi bir klinik bulguya rastlanmamıştır. Uçuş yapabilir, oturarak yolculuk yapabilir.
               </p>
               <p className="text-[11pt] leading-relaxed text-slate-500 italic mt-4 text-justify border-l-4 border-slate-200 pl-6">
-                Following the clinical examination and medical evaluation of <strong>{data.name || "..................."}</strong>, no medical contraindications have been found to prevent air travel.
+                Following the control examination and medical evaluation of <strong>{data.name || "..................."}</strong>, no medical contraindications have been found to prevent air travel. The patient is cleared for flight and seated travel.
               </p>
             </div>
 
-            <div className="mt-12 p-8 bg-slate-950 rounded-3xl text-white shadow-2xl transform">
+            <div className="mt-8 p-8 bg-white rounded-3xl text-slate-900 shadow-2xl border border-slate-100">
               <div className="flex items-center gap-4 mb-4">
-                <div className="bg-emerald-500 p-2 rounded-lg">
-                  <Plane className="w-6 h-6 text-slate-950" />
+                <div className="bg-blue-100 p-3 rounded-2xl">
+                  <Plane className="w-6 h-6 text-blue-800" />
                 </div>
-                <h4 className="text-lg font-black uppercase tracking-wider text-emerald-400">TIBBİ ONAY / MEDICAL CLEARANCE</h4>
+                <h4 className="text-xl font-black uppercase tracking-wider text-blue-900">TIBBİ ONAY / MEDICAL CLEARANCE</h4>
               </div>
-              <p className="text-[14pt] font-bold leading-snug">
+              <p className="text-[16pt] font-bold leading-snug text-slate-900">
                 <span className="opacity-60 font-medium text-lg">Hastanın</span> <strong>{formatDate(data.flightDate)}</strong> <span className="opacity-60 font-medium text-sm">tarihi itibarı ile uçuş yapmasında sakınca yoktur.</span>
               </p>
-              <div className="h-px bg-white/10 my-4"></div>
-              <p className="text-[11pt] italic text-slate-400">
+              <div className="h-px bg-slate-100 my-4"></div>
+              <p className="text-[12pt] italic text-slate-500">
                 As of <strong>{formatDate(data.flightDate)}</strong>, the patient is medically cleared for flight. No pathological findings were detected.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t-2 border-slate-100 pt-12 flex justify-between items-end">
-          <div className="space-y-1">
-            <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Rapor Tarihi / Report Date</p>
-            <p className="text-lg font-bold text-slate-900">{new Date().toLocaleDateString('tr-TR')}</p>
-            <div className="mt-8 text-[7pt] text-slate-300 max-w-[200px] leading-tight font-medium uppercase tracking-[0.1em]">
-              Bu belge Op. Dr. İbrahim Yağcı asistan paneli tarafından dijital olarak doğrulanmıştır.
+        <div className="mt-auto">
+          {/* Signature Section */}
+          <div className="flex justify-between items-end mb-8 px-4">
+            <div className="space-y-1">
+            </div>
+
+            <div className="text-right flex flex-col items-center min-w-[250px] relative">
+              <div className="absolute -top-16 right-0 w-48 h-48 opacity-5 pointer-events-none">
+                <Languages className="w-full h-full text-slate-900" />
+              </div>
+
+              <div className="z-10 text-center">
+                <div className="text-blue-900 font-black text-xl mb-1">Op. Dr. İbrahim YAĞCI</div>
+                <div className="text-blue-800 font-bold text-sm uppercase tracking-widest mb-0.5">KBB ve B.B.C Uzmanı</div>
+                <div className="text-blue-800 text-xs font-semibold">Diploma Tescil No: 182657</div>
+
+                <div className="mt-8 border-t border-slate-200 pt-2">
+                  <p className="text-[8pt] font-black text-slate-400 uppercase tracking-[0.3em]">KAŞE - İMZA / STAMP</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="text-right flex flex-col items-center min-w-[250px] relative">
-            <div className="absolute -top-16 right-0 w-48 h-48 opacity-5 pointer-events-none">
-              <Languages className="w-full h-full text-slate-900" />
+          {/* Footer Line & Content */}
+          <div className="border-t-4 border-slate-900 pt-6 flex justify-between items-start">
+            <div>
+              <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Hastane Adresi / Hospital Address</p>
+              <p className="text-sm font-bold text-slate-800 max-w-[300px] leading-snug">BHT Klinik Tema Hastanesi</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">Atakent, 4. Cd. No:36, 34307 Küçükçekmece/İstanbul</p>
             </div>
 
-            <div className="z-10 text-center">
-              <div className="text-blue-900 font-black text-xl mb-1">Op. Dr. İbrahim YAĞCI</div>
-              <div className="text-blue-800 font-bold text-sm uppercase tracking-widest mb-0.5">KBB ve B.B.C Uzmanı</div>
-              <div className="text-blue-800 text-xs font-semibold">Diploma Tescil No: 182657</div>
-
-              <div className="mt-8 border-t border-slate-200 pt-2">
-                <p className="text-[8pt] font-black text-slate-400 uppercase tracking-[0.3em]">KAŞE - İMZA / STAMP</p>
+            <div className="text-right">
+              <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-2">İletişim / Contact</p>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800 flex items-center justify-end gap-2">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hekim Asistanı Ezgi:</span>
+                  <span className="text-blue-600">+90 (551) 199 9963</span>
+                </p>
+                <p className="text-sm font-bold text-slate-800 flex items-center justify-end gap-2">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Doktor / Doctor:</span>
+                  <span className="text-blue-600">+90 (555) 551 1578</span>
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPreview?: boolean }) => {
+  const customLangs: Record<string, string> = {
+    tr: "TÜRKÇE", en: "İNGİLİZCE", de: "ALMANCA", es: "İSPANYOLCA",
+    ru: "RUSÇA", fr: "FRANSIZCA", it: "İTALYANCA", ro: "ROMENCE",
+    md: "MOLDOVCA", hu: "MACARCA", pl: "LEHÇE", ar: "ARAPÇA"
+  };
+
+  const data = postOpContent[lang];
+  if (!data) return <div>Content not found for {lang}</div>;
+
+  const containerClasses = "w-full bg-white text-slate-900 font-sans leading-relaxed h-full mx-auto";
+
+  return (
+    <div className={containerClasses} id={isPreview ? "preview-postop" : "printable-postop"}>
+      <style jsx global>{`
+        @media print {
+          @page { margin: 10mm; size: A4; }
+          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          .no-print { display: none !important; }
+        }
+        .modern-green-box {
+          background-color: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+          margin: 1.5rem 0;
+        }
+        .modern-green-box ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+        .modern-green-box li {
+          margin-bottom: 1rem;
+          padding-left: 1rem;
+          border-left: 3px solid #22c55e;
+        }
+        .drug-tag {
+          display: inline-block;
+          background-color: #e0f2fe;
+          color: #0369a1;
+          padding: 0.1rem 0.4rem;
+          border-radius: 0.3rem;
+          font-weight: 600;
+          font-size: 0.9em;
+          margin-left: 0.5rem;
+        }
+      `}</style>
+
+      <div className="p-8 md:p-12 max-w-[210mm] mx-auto bg-white min-h-screen">
+        <div className="flex items-center justify-between border-b-2 border-slate-100 pb-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 mb-2">{data.title}</h1>
+            <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-sm font-bold uppercase tracking-wider">
+              {customLangs[lang] || lang.toUpperCase()}
+            </span>
+          </div>
+          <div className="text-right">
+            <div className="text-blue-900 font-black text-lg">Op. Dr. İbrahim YAĞCI</div>
+            <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">Rinoplasti & KBB</div>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {data.content.map((section, idx) => (
+            <div key={idx} className="space-y-4">
+              {section.title && !section.title.includes("9.") && (
+                <h2 className="text-xl font-bold text-slate-800 border-l-4 border-blue-500 pl-4">
+                  <span dangerouslySetInnerHTML={{ __html: section.title }} />
+                </h2>
+              )}
+
+              {section.text && (
+                <div
+                  className="prose prose-slate max-w-none text-justify text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: section.text }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400 font-medium">
+          <div>
+            <p>Rhinoplasty Clinic</p>
+            <p>İstanbul, Türkiye</p>
+          </div>
+          <div>
+            www.ibrahimyagci.com
           </div>
         </div>
       </div>
@@ -321,6 +447,13 @@ const CATEGORIES = [
       { id: "flight-report", title: "Uçuş Raporu", icon: <Plane className="w-6 h-6" /> },
       { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> }
     ]
+  },
+  {
+    id: "post_op_forms",
+    title: "Ameliyat Sonrası Bilgilendirme Formları",
+    icon: <Globe className="w-8 h-8" />,
+    color: "bg-violet-700/80",
+    // No static items, dynamically rendered
   }
 ];
 
@@ -341,9 +474,12 @@ const toTitleCaseTr = (str: string) => {
 };
 
 export default function Home() {
+  /* State */
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
+  const [selectedPostOpLang, setSelectedPostOpLang] = useState<string | null>(null); // New State for Post Op Language
   const [hoveredDoc, setHoveredDoc] = useState<string | null>(null);
+
 
   // Flight Report State
   const [flightData, setFlightData] = useState({ name: "", surgeryDate: "", flightDate: "" });
@@ -469,16 +605,24 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 md:p-8 flex flex-col items-center w-full max-w-7xl mx-auto bg-slate-950 text-slate-100 print:bg-white print:p-0 print:m-0 print:max-w-none">
-      <div className="print:hidden w-full flex flex-col items-center max-w-2xl">
-        <header className="w-full text-center mb-12 mt-8">
-          <h1
-            onClick={() => { setSelectedCategory(null); setActiveSubItem(null); }}
-            className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            Op. Dr. İbrahim YAĞCI
-          </h1>
-          <p className="text-slate-400 font-medium tracking-wide">Asistan Paneli</p>
-        </header>
+      <div className="print:hidden w-full flex flex-col items-center max-w-2xl px-4">
+
+        {/* Header / Navigation Check: Hide header if in PostOp reading mode */}
+        {!selectedPostOpLang && (
+          <header className="w-full flex items-center justify-center gap-6 mb-12 mt-8">
+            <div className="text-right">
+              <h1
+                onClick={() => { setSelectedCategory(null); setActiveSubItem(null); setSelectedPostOpLang(null); }}
+                className="text-3xl md:text-5xl font-black tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity leading-tight"
+              >
+                Op. Dr. İbrahim YAĞCI
+              </h1>
+              <p className="text-slate-400 font-medium tracking-wide text-sm md:text-base">Hekim Asistanı Paneli</p>
+            </div>
+            <div className="h-16 w-[2px] bg-slate-700/50 rounded-full"></div>
+            <img src="/icon.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-2xl hover:scale-105 transition-transform" />
+          </header>
+        )}
 
         {!selectedCategory ? (
           <div className="w-full space-y-6">
@@ -499,9 +643,12 @@ export default function Home() {
         ) : (
           <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center gap-3 mb-6">
+
+
               <button
                 onClick={() => {
-                  if (activeSubItem) setActiveSubItem(null);
+                  if (selectedPostOpLang) setSelectedPostOpLang(null);
+                  else if (activeSubItem) setActiveSubItem(null);
                   else setSelectedCategory(null);
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-slate-900/50 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-all border border-slate-800"
@@ -514,6 +661,7 @@ export default function Home() {
                 onClick={() => {
                   setSelectedCategory(null);
                   setActiveSubItem(null);
+                  setSelectedPostOpLang(null);
                 }}
                 className="flex items-center gap-2 px-5 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 rounded-full font-bold transition-all border border-blue-500/20 shadow-lg"
               >
@@ -522,9 +670,11 @@ export default function Home() {
               </button>
             </div>
 
-            <h2 className="text-3xl font-black mb-8 text-white border-l-8 border-emerald-500 pl-6 uppercase tracking-tight">
-              {getActiveTitle()}
-            </h2>
+            {!selectedPostOpLang && (
+              <h2 className="text-3xl font-black mb-8 text-white border-l-8 border-emerald-500 pl-6 uppercase tracking-tight">
+                {getActiveTitle()}
+              </h2>
+            )}
 
             {(selectedCategory.id === "raporlar" || selectedCategory.id === "formlar") && !activeSubItem ? (
               <div className="space-y-4">
@@ -817,6 +967,31 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            ) : selectedCategory.id === "post_op_forms" && !selectedPostOpLang ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {Object.keys(postOpContent).map((langKey) => (
+                  <button
+                    key={langKey}
+                    onClick={() => setSelectedPostOpLang(langKey)}
+                    className="p-4 bg-slate-900 hover:bg-violet-600 border border-slate-800 hover:border-violet-500 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group shadow-md hover:shadow-xl"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-white/20 flex items-center justify-center text-xl">
+                      {{
+                        tr: "🇹🇷", en: "🇬🇧", de: "🇩🇪", es: "🇪🇸",
+                        ru: "🇷🇺", fr: "🇫🇷", it: "🇮🇹", ro: "🇷🇴",
+                        md: "🇲🇩", hu: "🇭🇺", pl: "🇵🇱", ar: "🇸🇦"
+                      }[langKey] || "🌐"}
+                    </div>
+                    <span className="text-sm font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">
+                      {{
+                        tr: "TÜRKÇE", en: "İNGİLİZCE", de: "ALMANCA", es: "İSPANYOLCA",
+                        ru: "RUSÇA", fr: "FRANSIZCA", it: "İTALYANCA", ro: "ROMENCE",
+                        md: "MOLDOVCA", hu: "MACARCA", pl: "LEHÇE", ar: "ARAPÇA"
+                      }[langKey] || langKey.toUpperCase()}
+                    </span>
+                  </button>
+                ))}
+              </div>
             ) : (
               <div className="space-y-4">
                 {selectedCategory.docs?.length > 0 ? (
@@ -882,49 +1057,61 @@ export default function Home() {
               </div>
             )}
           </div>
+
         )}
       </div>
 
+      {/* POST OP PRINTABLE VIEW */}
+      {
+        selectedPostOpLang && (
+          <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <PostOpInfoPrintable lang={selectedPostOpLang} />
+          </div>
+        )
+      }
+
       {/* Warning Modal for Future Patients */}
-      {selectedFuturePatient && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
-            <button
-              onClick={() => setSelectedFuturePatient(null)}
-              className="absolute top-4 right-4 p-2 hover:bg-slate-800 rounded-full transition-colors"
-            >
-              <X className="w-6 h-6 text-slate-400" />
-            </button>
-
-            <div className="flex flex-col items-center text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-amber-500" />
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white">Dikkat</h3>
-                <p className="text-slate-400 font-medium text-lg leading-relaxed">
-                  <span className="text-white font-bold">{selectedFuturePatient.name}</span> isimli hasta henüz ameliyat edilmemiştir.
-                </p>
-                <p className="text-slate-500 text-sm">
-                  Ameliyat Tarihi: <span className="font-bold text-slate-400">{selectedFuturePatient.surgeryDate.split('-').reverse().join('.')}</span>
-                </p>
-              </div>
-
+      {
+        selectedFuturePatient && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
               <button
                 onClick={() => setSelectedFuturePatient(null)}
-                className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-colors"
+                className="absolute top-4 right-4 p-2 hover:bg-slate-800 rounded-full transition-colors"
               >
-                Tamam, Anlaşıldı
+                <X className="w-6 h-6 text-slate-400" />
               </button>
+
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <AlertTriangle className="w-8 h-8 text-amber-500" />
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-white">Dikkat</h3>
+                  <p className="text-slate-400 font-medium text-lg leading-relaxed">
+                    <span className="text-white font-bold">{selectedFuturePatient.name}</span> isimli hasta henüz ameliyat edilmemiştir.
+                  </p>
+                  <p className="text-slate-500 text-sm">
+                    Ameliyat Tarihi: <span className="font-bold text-slate-400">{selectedFuturePatient.surgeryDate.split('-').reverse().join('.')}</span>
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setSelectedFuturePatient(null)}
+                  className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-colors"
+                >
+                  Tamam, Anlaşıldı
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Hidden Print Components */}
-      <FlightReportPrintable data={flightData} />
-      <IDReportPrintable data={idReportData} />
+      {activeSubItem === "flight-report" && <FlightReportPrintable data={flightData} />}
+      {activeSubItem === "id-report" && <IDReportPrintable data={idReportData} />}
     </main>
   );
 }
