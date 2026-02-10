@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X } from "lucide-react";
 
 /** 
  * modern-ucus-raporu component for printing and live preview
@@ -366,6 +366,10 @@ export default function Home() {
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Future Patient Logic
+  const [selectedFuturePatient, setSelectedFuturePatient] = useState<any | null>(null);
+  const firstPastPatientRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     // Click outside listener for dropdown
     function handleClickOutside(event: MouseEvent) {
@@ -400,7 +404,10 @@ export default function Home() {
   useEffect(() => {
     // Search & Filter Logic
     if (activeSubItem === "flight-report" || activeSubItem === "id-report") {
-      let results = patients;
+      let results = [...patients]; // Clone to sort
+
+      // Sort: Future -> Present -> Past
+      results.sort((a, b) => b.surgeryDate.localeCompare(a.surgeryDate));
 
       // 1. Filter by Search Term (if exists)
       if (searchTerm.length >= 2) {
@@ -408,10 +415,12 @@ export default function Home() {
         results = results.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(query));
       }
 
-      // 2. Filter by Context (Flight Report = Last 30 Days)
+      // 2. Filter by Context (Flight Report = Last 30 Days OR Future)
       if (activeSubItem === "flight-report") {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Include Future (>Today) AND Recent Past (>= 30 days ago)
         results = results.filter(p => new Date(p.surgeryDate) >= thirtyDaysAgo);
       }
 
@@ -420,6 +429,13 @@ export default function Home() {
       // Show if searching OR dropdown is toggled
       if ((searchTerm.length >= 2) || showDropdown) {
         setShowSearch(results.length > 0);
+
+        // Auto-scroll to first past patient
+        setTimeout(() => {
+          if (firstPastPatientRef.current) {
+            firstPastPatientRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
       } else {
         setShowSearch(false);
       }
