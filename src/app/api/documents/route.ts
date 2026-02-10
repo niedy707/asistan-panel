@@ -34,11 +34,17 @@ export async function GET() {
                 const procedureMap: Record<string, { name: string, langs: { label: string, path: string }[] }> = {};
 
                 files.forEach(file => {
-                    // regex to match "onam [Procedure] [Lang].pdf"
-                    const match = file.match(/^onam\s+(.+)\s+(TR|EN|DE|ES|RU|FR|IT|RO|MD|HU|PL|AR)\.pdf$/i);
+                    // updated regex to match "onam [|] [Procedure] [Lang].pdf"
+                    // supports optional pipe and ENG code
+                    const match = file.match(/^onam\s*[|]?\s*(.+?)\s+(TR|EN|ENG|DE|ES|RU|FR|IT|RO|MD|HU|PL|AR)\.pdf$/i);
                     if (match) {
-                        const procedure = match[1].trim();
-                        const langCode = match[2].toUpperCase();
+                        let procedure = match[1].trim();
+                        // Strip leading/trailing | if still present
+                        procedure = procedure.replace(/^[|\s]+|[|\s]+$/g, '');
+
+                        const langCodeRaw = match[2].toUpperCase();
+                        const langCode = langCodeRaw === 'ENG' ? 'EN' : langCodeRaw;
+
                         const langLabel = {
                             TR: 'Türkçe', EN: 'İngilizce', DE: 'Almanca', ES: 'İspanyolca',
                             RU: 'Rusça', FR: 'Fransızca', IT: 'İtalyanca', RO: 'Romence',

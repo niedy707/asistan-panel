@@ -388,30 +388,7 @@ const CATEGORIES = [
     title: "Onamlar",
     icon: <ClipboardList className="w-8 h-8" />,
     color: "bg-emerald-700/80",
-    docs: [
-      {
-        name: "Rinoplasti",
-        langs: [
-          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d46035a5987e490ab1aacea811ab8bca.pdf" },
-          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_45f487fa44844cf19e68029bc40a965a.pdf" }
-        ]
-      },
-      {
-        name: "Revizyon Rinoplasti",
-        langs: [
-          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_909ed95a53d947a4ad593ebc1748b6f9.pdf" },
-          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1c69cdd05170490e9610e70430dd18b2.pdf" }
-        ]
-      },
-      {
-        name: "Kostal Kıkırdak (Kosta)",
-        langs: [
-          { label: "Türkçe", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_6302964bb8ad4c049b8f914deca5513a.pdf" },
-          { label: "İngilizce", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_02bbabe6f1754566ae4342f847e2a51d.pdf" }
-        ]
-      },
-      { name: "Görsel içerik işleme onamı", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_695473bf67e74d69b1f886ff3fb06e50.pdf" }
-    ]
+    docs: []
   },
   {
     id: "receteler",
