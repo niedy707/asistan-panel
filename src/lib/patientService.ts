@@ -81,7 +81,7 @@ export async function syncPatients(): Promise<{ success: boolean; count: number;
                 if (name.length < 3) return; // Skip if name is too short after cleaning
 
                 // Title Case Normalization
-                const formattedName = name.toLocaleLowerCase('tr-TR').split(' ').map(word =>
+                const formattedName = name.toLocaleLowerCase('tr-TR').split(' ').map((word: string) =>
                     word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1)
                 ).join(' ');
 
