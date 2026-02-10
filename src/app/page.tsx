@@ -645,15 +645,22 @@ export default function Home() {
                     <Printer className="w-7 h-7" />
                     Belgeyi Yazdır (A4)
                   </button>
-                </div>
+                  {/* Preview Section */}
+                  {isFlightDataValid && (
+                    <div className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="h-px flex-1 bg-slate-800"></div>
+                        <span className="text-slate-500 font-bold text-sm tracking-widest uppercase">Belge Önizleme (A4) / Document Preview</span>
+                        <div className="h-px flex-1 bg-slate-800"></div>
+                      </div>
 
-                <div className="w-full pt-8">
-                  <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
-                    BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
-                  </p>
-                  <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
-                    <FlightReportPrintable data={flightData} isPreview={true} />
-                  </div>
+                      <div className="relative mx-auto rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-4 md:p-8">
+                        <div className="scale-[0.5] md:scale-[0.6] origin-top h-[600px] overflow-hidden">
+                          <FlightReportPrintable data={flightData} isPreview={true} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : activeSubItem === "id-report" ? (
@@ -782,14 +789,17 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="w-full pt-8">
-                  <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
-                    BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
-                  </p>
-                  <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
-                    <IDReportPrintable data={idReportData} isPreview={true} />
+                {/* ID Report Preview */}
+                {isIdDataValid && (
+                  <div className="w-full pt-8">
+                    <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
+                      BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
+                    </p>
+                    <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
+                      <IDReportPrintable data={idReportData} isPreview={true} />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -858,6 +868,47 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Warning Modal for Future Patients */}
+      {selectedFuturePatient && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
+            <button
+              onClick={() => setSelectedFuturePatient(null)}
+              className="absolute top-4 right-4 p-2 hover:bg-slate-800 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6 text-slate-400" />
+            </button>
+
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-amber-500" />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white">Dikkat</h3>
+                <p className="text-slate-400 font-medium text-lg leading-relaxed">
+                  <span className="text-white font-bold">{selectedFuturePatient.name}</span> isimli hasta henüz ameliyat edilmemiştir.
+                </p>
+                <p className="text-slate-500 text-sm">
+                  Ameliyat Tarihi: <span className="font-bold text-slate-400">{selectedFuturePatient.surgeryDate.split('-').reverse().join('.')}</span>
+                </p>
+              </div>
+
+              <button
+                onClick={() => setSelectedFuturePatient(null)}
+                className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-colors"
+              >
+                Tamam, Anlaşıldı
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Print Components */}
+      <FlightReportPrintable data={flightData} />
+      <IDReportPrintable data={idReportData} />
     </main>
   );
 }
