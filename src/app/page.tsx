@@ -1028,7 +1028,10 @@ export default function Home() {
                                 rel="noopener noreferrer"
                                 className="p-3 bg-slate-800/80 hover:bg-emerald-600 text-slate-300 hover:text-white rounded-xl flex items-center justify-between transition-colors text-sm font-bold group/lang"
                               >
-                                {l.label}
+                                <span className="flex items-center gap-2">
+                                  {l.flag && <span>{l.flag}</span>}
+                                  {l.label}
+                                </span>
                                 <ExternalLink className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
                               </a>
                             ))}
