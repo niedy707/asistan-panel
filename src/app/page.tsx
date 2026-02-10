@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X, Globe } from "lucide-react";
 import { postOpContent } from "@/lib/postOpContent";
 
@@ -498,6 +498,36 @@ export default function Home() {
   const [patients, setPatients] = useState<any[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [dynamicDocs, setDynamicDocs] = useState<Record<string, any[]>>({});
+
+  // Fetch dynamic documents
+  useEffect(() => {
+    fetch('/api/documents')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setDynamicDocs(data);
+        }
+      })
+      .catch(err => console.error("Failed to fetch dynamic docs:", err));
+  }, []);
+
+  // Merge hardcoded categories with dynamic documents
+  const displayCategories = useMemo(() => {
+    return CATEGORIES.map(cat => {
+      const dynamicItems = dynamicDocs[cat.id] || [];
+      if (dynamicItems.length === 0) return cat;
+
+      // Merge docs: filter out any dynamic docs that might overlap by name, or just append
+      // For onamlar, we have a complex structure
+      const baseDocs = cat.docs || [];
+
+      return {
+        ...cat,
+        docs: [...baseDocs, ...dynamicItems]
+      };
+    });
+  }, [dynamicDocs]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -625,8 +655,8 @@ export default function Home() {
         )}
 
         {!selectedCategory ? (
-          <div className="w-full space-y-6">
-            {CATEGORIES.map((cat) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full animate-in fade-in zoom-in duration-500">
+            {displayCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat)}
