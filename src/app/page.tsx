@@ -555,7 +555,10 @@ const CATEGORIES = [
     title: "Reçeteler",
     icon: <Pill className="w-8 h-8" />,
     color: "bg-rose-700/80",
-    docs: []
+    docs: [],
+    subItems: [
+      { id: "prescription-builder", title: "Reçete Oluşturucu (Beta)", icon: <FileEdit className="w-6 h-6" />, path: "/recete-olustur" }
+    ]
   },
   {
     id: "formlar",
@@ -785,7 +788,7 @@ export default function Home() {
         {/* Header / Navigation Check: Hide header if in PostOp reading mode */}
         {!selectedPostOpLang && (
           <header className="w-full flex items-center justify-center gap-6 mb-12 mt-8">
-            <img src="/rinoplasti_logo.png" alt="Rinoplasti Logo" className="w-24 h-24 object-contain drop-shadow-2xl hover:scale-105 transition-transform" />
+            <img src="/logo-header.png?v=3" alt="Rinoplasti Logo" className="w-24 h-24 object-contain drop-shadow-2xl hover:scale-105 transition-transform" />
             <div className="h-20 w-[2px] bg-slate-700/50 rounded-full hidden md:block"></div>
             <div className="text-center md:text-right">
               <h1
@@ -964,7 +967,10 @@ export default function Home() {
                 {selectedCategory.subItems?.map((item: any) => (
                   <button
                     key={item.id}
-                    onClick={() => setActiveSubItem(item.id)}
+                    onClick={() => {
+                      if (item.path) window.location.href = item.path;
+                      else setActiveSubItem(item.id);
+                    }}
                     className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-xl"
                   >
                     <span className="flex items-center gap-4 text-xl font-bold">

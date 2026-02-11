@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçete - Cefaks + Cipro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .prescription-container {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .doctor-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .clinic-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .doctor-details h1 {
+            color: #1e3a8a;
+            font-size: 24px;
+            margin: 0;
+            font-weight: 900;
+        }
+
+        .doctor-details p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 5px 0 0;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .rx-symbol {
+            font-size: 48px;
+            color: #1e3a8a;
+            font-family: serif;
+            font-weight: bold;
+        }
+
+        .patient-info {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .info-group label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .medication-list {
+            margin-bottom: 40px;
+        }
+
+        .medication-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .medication-details {
+            flex: 1;
+        }
+
+        .med-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .med-dosage {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .med-usage {
+            font-weight: 600;
+            color: #0f172a;
+            margin-top: 5px;
+        }
+
+        .usage-box {
+            background-color: #f0fdf4;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #bbf7d0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding-left: 20px;
+        }
+
+        .btn-edit,
+        .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-edit {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-delete {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .add-med-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            color: #64748b;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .add-med-btn:hover {
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+
+        .footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 40px;
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 200px;
+            border-bottom: 2px solid #000;
+            margin-bottom: 10px;
+            height: 60px;
+            /* Space for signature */
+        }
+
+        .signature-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .prescription-container {
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+            }
+
+            .add-med-btn,
+            .controls {
+                display: none;
+            }
+
+            .info-group input {
+                border: none;
+                padding: 0;
+                font-weight: 600;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="prescription-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="doctor-info">
+                <!-- Replace with actual logo URL -->
+                <img src="/logo-header.png" alt="Logo" class="clinic-logo">
+                <div class="doctor-details">
+                    <h1>Op. Dr. İbrahim YAĞCI</h1>
+                    <p>Rinoplasti & KBB Uzmanı</p>
+                </div>
+            </div>
+            <div class="rx-symbol">Rx</div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="patient-info">
+            <div class="info-group">
+                <label>Hasta Adı Soyadı</label>
+                <input type="text" placeholder="Ad Soyad giriniz..." value="">
+            </div>
+            <div class="info-group">
+                <label>Tarih</label>
+                <input type="date" value="2026-02-11">
+            </div>
+        </div>
+
+        <!-- Medication List -->
+        <div class="medication-list">
+            <!-- Med 1: Cefaks -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">1. Cefaks 500 mg TB</div>
+                    <div class="med-dosage">2 kutu</div>
+                    <div class="med-usage">S: 2x1 (Sabah - Akşam,Tok karnına)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Antibiyotik</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 2: Cipro -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">2. Cipro 500 mg TB</div>
+                    <div class="med-dosage">1 kutu</div>
+                    <div class="med-usage">S: 2x1 (Sabah - Akşam, Tok karnına)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Antibiyotik</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 3: Arveles -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">3. Arveles 25 mg TB</div>
+                    <div class="med-dosage">1 kutu</div>
+                    <div class="med-usage">S: 2x1 (Ağrı durumunda, Tok karnına)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Ağrı Kesici</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 4: Majezik Spray -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">4. Majezik Sprey</div>
+                    <div class="med-dosage">1 kutu</div>
+                    <div class="med-usage">S: 3x4 puf (Boğaz ağrısı durumunda)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Boğaz Spreyi</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 5: Illiadın Spray -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">5. İlliadin Sprey</div>
+                    <div class="med-dosage">1 kutu</div>
+                    <div class="med-usage">S: 3x2 (Burun açıcı, sadece ilk 5 gün)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Burun Spreyi</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 6: Thiocilline ve Terramycin -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">6. Thiocilline ve Terramycin Krem</div>
+                    <div class="med-dosage">1'er kutu</div>
+                    <div class="med-usage">S: 3x1 (Dikişlere sürülecek)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Krem</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+            <!-- Med 7: Nazalnem veya Okyanus spreyi -->
+            <div class="medication-item">
+                <div class="medication-details">
+                    <div class="med-name">7. Nazalnem veya Okyanus suyu spreyi</div>
+                    <div class="med-dosage">1 kutu</div>
+                    <div class="med-usage">S: 8x1 (Burun içi nemlendirme, sıklıkla)</div>
+                </div>
+                <div class="controls">
+                    <span class="usage-box">Yıkama</span>
+                    <button class="btn-edit">Düzenle</button>
+                    <button class="btn-delete">Sil</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="add-med-btn">+ İlaç Ekle</div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Kaşe / İmza</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
