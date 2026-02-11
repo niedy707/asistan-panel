@@ -190,6 +190,149 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
   );
 };
 
+/** 
+ * General Medical Report / Letter Component
+ * Reuses the layout from FlightReportPrintable
+ */
+const GeneralReportPrintable = ({ data, isPreview = false }: { data: { name: string, date: string, title: string, content: string }, isPreview?: boolean }) => {
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "....................";
+    try {
+      if (dateStr.includes('.')) return dateStr;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      return new Date(dateStr).toLocaleDateString('tr-TR');
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const containerClasses = isPreview
+    ? "w-full mt-8 p-8 bg-white text-slate-900 rounded-3xl shadow-2xl border border-white/20 font-sans aspect-[210/297] mb-12 overflow-y-auto"
+    : "hidden print:block bg-white text-black font-sans leading-relaxed w-[210mm] h-[297mm] p-[10mm] mx-auto";
+
+  return (
+    <div className={containerClasses} id={isPreview ? "preview-general-report" : "printable-general-report"}>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
+        
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          #printable-general-report {
+            display: block !important;
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
+
+      <div className="h-full flex flex-col border-[0.5pt] border-slate-100 p-8 relative overflow-hidden">
+        {/* Background Element */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-full -z-10 opacity-50"></div>
+
+        {/* Header */}
+        <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-8">
+          <div className="text-left">
+            <h1 className="text-4xl font-black text-slate-950 leading-none mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Op. Dr. İbrahim YAĞCI
+            </h1>
+            <p className="text-[11pt] font-extrabold text-slate-700 uppercase tracking-wide">
+              Kulak Burun Boğaz Uzmanı & Rinoplasti
+            </p>
+            <p className="text-[10pt] italic text-slate-500 font-semibold mt-1">
+              Otorhinolaryngology & Rhinoplasty Surgeon
+            </p>
+          </div>
+          <div className="text-right pt-2">
+            <p className="text-[9pt] font-black text-slate-400 uppercase tracking-widest">Tarih / Date</p>
+            <p className="text-lg font-bold text-slate-900">{formatDate(data.date)}</p>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight">
+            {data.title || "TIBBİ RAPOR / MEDICAL REPORT"}
+          </h2>
+          <div className="flex items-center justify-center gap-4 my-1">
+            <div className="h-[1pt] bg-slate-200 flex-1"></div>
+          </div>
+        </div>
+
+        {/* Patient Info Block */}
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative mb-8">
+          <div className="absolute -top-3 left-6 bg-slate-900 text-white text-[8pt] font-black px-4 py-1 rounded-full uppercase tracking-widest">
+            HASTA BİLGİLERİ / PATIENT INFO
+          </div>
+          <div className="flex items-end gap-3 pb-2 border-b border-slate-300">
+            <span className="text-slate-500 font-bold uppercase text-xs w-32 shrink-0">İsim / Name:</span>
+            <span className="text-xl font-black text-slate-900 tracking-tight">{data.name || "................................................"}</span>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="flex-1 space-y-6">
+          <div className="whitespace-pre-wrap text-[12pt] leading-relaxed text-slate-900 text-justify font-medium">
+            {data.content || "......................................................................................................................................."}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-auto pt-8">
+          {/* Signature Section */}
+          <div className="flex justify-between items-end mb-8 px-4">
+            <div className="space-y-1"></div>
+            <div className="text-right flex flex-col items-center min-w-[250px] relative">
+              <div className="text-center">
+                <div className="z-10 relative">
+                  <div className="text-blue-900 font-black text-xl mb-1">Op. Dr. İbrahim YAĞCI</div>
+                  <div className="text-blue-800 font-bold text-sm uppercase tracking-widest mb-0.5">KBB ve B.B.C Uzmanı</div>
+                  <div className="text-blue-800 text-xs font-semibold">Diploma Tescil No: 182657</div>
+
+                  <div className="mt-8 border-t border-slate-200 pt-2">
+                    <p className="text-[8pt] font-black text-slate-400 uppercase tracking-[0.3em]">KAŞE - İMZA / STAMP</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Line & Content */}
+          <div className="border-t-4 border-slate-900 pt-6 flex justify-between items-start">
+            <div>
+              <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-1">Hastane Adresi / Hospital Address</p>
+              <p className="text-sm font-bold text-slate-800 max-w-[300px] leading-snug">BHT Klinik Tema Hastanesi</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">Atakent, 4. Cd. No:36, 34307 Küçükçekmece/İstanbul</p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-[8pt] font-black text-slate-400 uppercase tracking-widest mb-2">İletişim / Contact</p>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800 flex items-center justify-end gap-2">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hekim Asistanı Ezgi:</span>
+                  <span className="text-blue-600">+90 (551) 199 9963</span>
+                </p>
+                <p className="text-sm font-bold text-slate-800 flex items-center justify-end gap-2">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Doktor / Doctor:</span>
+                  <span className="text-blue-600">+90 (555) 551 1578</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPreview?: boolean }) => {
   const customLangs: Record<string, string> = {
     tr: "TÜRKÇE", en: "İNGİLİZCE", de: "ALMANCA", es: "İSPANYOLCA",
@@ -216,6 +359,10 @@ const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPrev
           border-radius: 0.75rem;
           padding: 1.5rem;
           margin: 1.5rem 0;
+          break-inside: avoid;
+          page-break-inside: avoid;
+          break-before: column;
+          -webkit-column-break-before: always;
         }
         .modern-green-box ul {
           list-style-type: none;
@@ -241,23 +388,25 @@ const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPrev
 
       <div className="p-8 md:p-12 max-w-[210mm] mx-auto bg-white min-h-screen">
         <div className="flex items-center justify-between border-b-2 border-slate-100 pb-6 mb-8">
+          <div className="flex items-center gap-4 text-left">
+            <img src="/rinoplasti_logo.png" alt="Logo" className="w-20 h-20 object-contain" />
+            <div>
+              <div className="text-blue-900 font-black text-2xl">Op. Dr. İbrahim YAĞCI</div>
+              <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">Rinoplasti & KBB</div>
+            </div>
+          </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 mb-2">{data.title}</h1>
             <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-sm font-bold uppercase tracking-wider">
               {customLangs[lang] || lang.toUpperCase()}
             </span>
           </div>
-          <div className="text-right">
-            <div className="text-blue-900 font-black text-lg">Op. Dr. İbrahim YAĞCI</div>
-            <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">Rinoplasti & KBB</div>
-          </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="columns-1 md:columns-2 print:columns-2 gap-8 space-y-0 block">
           {data.content.map((section, idx) => (
-            <div key={idx} className="space-y-4">
+            <div key={idx} className="mb-6 break-inside-avoid page-break-inside-avoid inline-block w-full">
               {section.title && !section.title.includes("9.") && (
-                <h2 className="text-xl font-bold text-slate-800 border-l-4 border-blue-500 pl-4">
+                <h2 className="text-xl font-bold text-slate-800 border-l-4 border-blue-500 pl-4 mb-2">
                   <span dangerouslySetInnerHTML={{ __html: section.title }} />
                 </h2>
               )}
@@ -372,16 +521,27 @@ const IDReportPrintable = ({ data, isPreview = false }: { data: any, isPreview?:
   );
 };
 
+const LANGUAGES = [
+  { code: 'tr', name: 'TÜRKÇE', flag: '🇹🇷' },
+  { code: 'en', name: 'İNGİLİZCE', flag: '🇬🇧' },
+  { code: 'de', name: 'ALMANCA', flag: '🇩🇪' },
+  { code: 'es', name: 'İSPANYOLCA', flag: '🇪🇸' },
+  { code: 'ru', name: 'RUSÇA', flag: '🇷🇺' },
+  { code: 'fr', name: 'FRANSIZCA', flag: '🇫🇷' },
+  { code: 'it', name: 'İTALYANCA', flag: '🇮🇹' },
+  { code: 'ro', name: 'ROMENCE', flag: '🇷🇴' },
+  { code: 'pl', name: 'LEHÇE', flag: '🇵🇱' },
+  { code: 'ar', name: 'ARAPÇA', flag: '🇸🇦' },
+  { code: 'az', name: 'AZERİCE', flag: '🇦🇿' },
+];
+
 const CATEGORIES = [
   {
     id: "bilgilendirme",
     title: "Hasta Bilgilendirme",
     icon: <FileText className="w-8 h-8" />,
     color: "bg-emerald-700/80",
-    docs: [
-      { name: "Hasta Bilgilendirme", iconType: "pdf", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_d1ac4338b4f74882bb5a73997dd2a957.pdf" },
-      { name: "Hasta Bilgilendirme (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_1f1b252813894b4e9bbbbe23f53fc90f.pdf" }
-    ]
+    docs: []
   },
   {
     id: "onamlar",
@@ -394,16 +554,8 @@ const CATEGORIES = [
     id: "receteler",
     title: "Reçeteler",
     icon: <Pill className="w-8 h-8" />,
-    color: "bg-emerald-700/80",
-    docs: [
-      { name: "Reçete rino | [TR] Cefaks + Cipro", path: "/documents/receteler/reçete rino | [TR] Cefaks + Cipro .pdf" },
-      { name: "Reçete rino | 2025 CEFAKS", path: "/documents/receteler/reçete rino | 2025 CEFAKS.pdf" },
-      { name: "Reçete rino | 2025 CİPRO", path: "/documents/receteler/reçete rino | 2025 CİPRO.pdf" },
-      { name: "Reçete rino | [EN] Cipro + Cefaks", path: "/documents/receteler/reçete rino | [EN] Cipro + Cefaks.pdf" },
-      { name: "Reçete rino | [ESP] Cipro + Cefaks", path: "/documents/receteler/reçete rino | [ESP] Cipro + Cefaks.pdf" },
-      { name: "Reçete rino | 2025 CEFAKS Fransızca", path: "/documents/receteler/reçete rino | 2025 CEFAKS Fransızca.pdf" },
-      { name: "Reçete rino | 2025 ingilizce", path: "/documents/receteler/reçete rino | 2025 ingilizce.pdf" }
-    ]
+    color: "bg-rose-700/80",
+    docs: []
   },
   {
     id: "formlar",
@@ -422,7 +574,8 @@ const CATEGORIES = [
     color: "bg-blue-700/80",
     subItems: [
       { id: "flight-report", title: "Uçuş Raporu", icon: <Plane className="w-6 h-6" /> },
-      { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> }
+      { id: "id-report", title: "Kimlik / Pasaport Yenileme Raporu", icon: <FileEdit className="w-6 h-6" /> },
+      { id: "general-report", title: "Genel Rapor / Yazı", icon: <FileEdit className="w-6 h-6" /> }
     ]
   },
   {
@@ -466,9 +619,24 @@ export default function Home() {
   const [idReportData, setIdReportData] = useState({
     name: "",
     surgeryDate: "",
-    reportDate: new Date().toLocaleDateString('tr-TR'),
-    ...PASSPORT_REPORT_TEMPLATE
+    diagnosis: PASSPORT_REPORT_TEMPLATE.diagnosis,
+    surgeryPerformed: PASSPORT_REPORT_TEMPLATE.surgeryPerformed,
+    complaint: PASSPORT_REPORT_TEMPLATE.complaint,
+    history: PASSPORT_REPORT_TEMPLATE.history,
+    examination: PASSPORT_REPORT_TEMPLATE.examination,
+    followUp: PASSPORT_REPORT_TEMPLATE.followUp,
+    surgeryNote: PASSPORT_REPORT_TEMPLATE.surgeryNote,
+    reportDate: new Date().toLocaleDateString('tr-TR')
   });
+
+  // General Report State
+  const [generalReportData, setGeneralReportData] = useState({
+    name: "",
+    date: new Date().toLocaleDateString('tr-TR'),
+    title: "TIBBİ RAPOR / MEDICAL REPORT",
+    content: ""
+  });
+
 
   // Patient Search State
   const [searchTerm, setSearchTerm] = useState("");
@@ -617,7 +785,9 @@ export default function Home() {
         {/* Header / Navigation Check: Hide header if in PostOp reading mode */}
         {!selectedPostOpLang && (
           <header className="w-full flex items-center justify-center gap-6 mb-12 mt-8">
-            <div className="text-right">
+            <img src="/rinoplasti_logo.png" alt="Rinoplasti Logo" className="w-24 h-24 object-contain drop-shadow-2xl hover:scale-105 transition-transform" />
+            <div className="h-20 w-[2px] bg-slate-700/50 rounded-full hidden md:block"></div>
+            <div className="text-center md:text-right">
               <h1
                 onClick={() => { setSelectedCategory(null); setActiveSubItem(null); setSelectedPostOpLang(null); }}
                 className="text-3xl md:text-5xl font-black tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity leading-tight"
@@ -626,8 +796,8 @@ export default function Home() {
               </h1>
               <p className="text-slate-400 font-medium tracking-wide text-sm md:text-base">Hekim Asistanı Paneli</p>
             </div>
-            <div className="h-16 w-[2px] bg-slate-700/50 rounded-full"></div>
-            <img src="/icon.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-2xl hover:scale-105 transition-transform" />
+            {/* Right side spacer to balance layout if needed, or keep empty/hidden */}
+            <div className="w-24 hidden md:block"></div>
           </header>
         )}
 
@@ -678,9 +848,99 @@ export default function Home() {
             </div>
 
             {!selectedPostOpLang && (
-              <h2 className="text-3xl font-black mb-8 text-white border-l-8 border-emerald-500 pl-6 uppercase tracking-tight">
-                {getActiveTitle()}
-              </h2>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4 w-full">
+                <h2 className="text-3xl font-black text-white border-l-8 border-emerald-500 pl-6 uppercase tracking-tight">
+                  {getActiveTitle()}
+                </h2>
+
+                {selectedCategory.id === "onamlar" && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Package 1: Routine TR */}
+                    <button
+                      onClick={() => {
+                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel"];
+                        selectedCategory.docs?.forEach((doc: any) => {
+                          const nameLower = doc.name.toLowerCase();
+                          const isRoutine = keywords.some(k => nameLower.includes(k));
+                          if (isRoutine && !nameLower.includes("rinoplasti")) {
+                            if (doc.langs) {
+                              const l = doc.langs.find((x: any) => x.label === "TR");
+                              if (l) window.open(l.path, "_blank");
+                            }
+                          }
+                        });
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105"
+                    >
+                      <span className="text-xs">Paket-1 (TR)</span>
+                      <span className="text-[9px] opacity-80 font-medium leading-none">Rutin</span>
+                    </button>
+
+                    {/* Package 2: Routine EN */}
+                    <button
+                      onClick={() => {
+                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel"];
+                        selectedCategory.docs?.forEach((doc: any) => {
+                          const nameLower = doc.name.toLowerCase();
+                          const isRoutine = keywords.some(k => nameLower.includes(k));
+                          if (isRoutine && !nameLower.includes("rinoplasti")) {
+                            if (doc.langs) {
+                              const l = doc.langs.find((x: any) => x.label === "EN");
+                              if (l) window.open(l.path, "_blank");
+                            }
+                          }
+                        });
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105"
+                    >
+                      <span className="text-xs">Paket-2 (EN)</span>
+                      <span className="text-[9px] opacity-80 font-medium leading-none">Routine</span>
+                    </button>
+
+                    {/* Package 3: Routine + Rino TR */}
+                    <button
+                      onClick={() => {
+                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel", "rinoplasti"];
+                        selectedCategory.docs?.forEach((doc: any) => {
+                          const nameLower = doc.name.toLowerCase();
+                          const isTarget = keywords.some(k => nameLower.includes(k));
+                          if (isTarget) {
+                            if (doc.langs) {
+                              const l = doc.langs.find((x: any) => x.label === "TR");
+                              if (l) window.open(l.path, "_blank");
+                            }
+                          }
+                        });
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105 border border-emerald-500"
+                    >
+                      <span className="text-xs">Paket-1 + Rino</span>
+                      <span className="text-[9px] opacity-80 font-medium leading-none">Rutin + Rino</span>
+                    </button>
+
+                    {/* Package 4: Routine + Rino EN */}
+                    <button
+                      onClick={() => {
+                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel", "rinoplasti"];
+                        selectedCategory.docs?.forEach((doc: any) => {
+                          const nameLower = doc.name.toLowerCase();
+                          const isTarget = keywords.some(k => nameLower.includes(k));
+                          if (isTarget) {
+                            if (doc.langs) {
+                              const l = doc.langs.find((x: any) => x.label === "EN");
+                              if (l) window.open(l.path, "_blank");
+                            }
+                          }
+                        });
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105 border border-emerald-500"
+                    >
+                      <span className="text-xs">Paket-2 + Rino</span>
+                      <span className="text-[9px] opacity-80 font-medium leading-none">Routine + Rino</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {(selectedCategory.id === "raporlar" || selectedCategory.id === "formlar") && !activeSubItem ? (
@@ -974,33 +1234,185 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            ) : selectedCategory.id === "post_op_forms" && !selectedPostOpLang ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {Object.keys(postOpContent).map((langKey) => (
-                  <button
-                    key={langKey}
-                    onClick={() => setSelectedPostOpLang(langKey)}
-                    className="p-4 bg-slate-900 hover:bg-violet-600 border border-slate-800 hover:border-violet-500 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group shadow-md hover:shadow-xl"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-white/20 flex items-center justify-center text-xl">
-                      {{
-                        tr: "🇹🇷", en: "🇬🇧", de: "🇩🇪", es: "🇪🇸",
-                        ru: "🇷🇺", fr: "🇫🇷", it: "🇮🇹", ro: "🇷🇴",
-                        md: "🇲🇩", hu: "🇭🇺", pl: "🇵🇱", ar: "🇸🇦"
-                      }[langKey] || "🌐"}
+            ) : activeSubItem === "general-report" ? (
+              <div className="space-y-6">
+                <div className="glass-card p-8 border-violet-500/30 space-y-6 shadow-2xl relative bg-slate-900/40 rounded-[2.5rem] print:hidden">
+                  {/* Reuse Patient Search Logic */}
+                  <div className="relative" ref={dropdownRef}>
+                    <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Hasta Adı Soyadı</label>
+                    {/* Search Input similar to Flight Report */}
+                    <div className="relative flex items-center">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 z-10" />
+                      <input
+                        type="text"
+                        placeholder="Arama yapın..."
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-l-2xl rounded-r-none pl-12 pr-4 py-4 focus:border-violet-500 outline-none transition-all text-white text-lg font-bold"
+                        value={searchTerm || generalReportData.name}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setGeneralReportData({ ...generalReportData, name: e.target.value });
+                          setShowDropdown(true);
+                        }}
+                        onFocus={() => setShowDropdown(true)}
+                      />
+                      {/* Dropdown toggle button */}
+                      <button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="bg-slate-800 border-2 border-l-0 border-slate-800 rounded-r-2xl px-4 py-4 h-full hover:bg-slate-700 transition-colors flex items-center justify-center group"
+                      >
+                        <ChevronLeft className={`w-6 h-6 text-slate-400 transition-transform duration-300 ${showDropdown ? '-rotate-90' : 'rotate-90'}`} />
+                      </button>
                     </div>
-                    <span className="text-sm font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">
-                      {{
-                        tr: "TÜRKÇE", en: "İNGİLİZCE", de: "ALMANCA", es: "İSPANYOLCA",
-                        ru: "RUSÇA", fr: "FRANSIZCA", it: "İTALYANCA", ro: "ROMENCE",
-                        md: "MOLDOVCA", hu: "MACARCA", pl: "LEHÇE", ar: "ARAPÇA"
-                      }[langKey] || langKey.toUpperCase()}
-                    </span>
+
+                    {/* Dropdown List */}
+                    {showSearch && (
+                      <div className="absolute z-[100] mt-2 w-full bg-slate-900 border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 divide-y divide-slate-800 max-h-[300px] overflow-y-auto custom-scrollbar">
+                        {filteredPatients.map((p, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              const formattedName = toTitleCaseTr(p.name);
+                              setGeneralReportData({ ...generalReportData, name: formattedName });
+                              setSearchTerm("");
+                              setShowSearch(false);
+                              setShowDropdown(false);
+                            }}
+                            className="w-full p-4 text-left hover:bg-slate-800 flex items-center justify-between transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <User className="w-5 h-5 text-violet-400 group-hover:text-violet-300" />
+                              <span className="text-slate-100 font-bold text-lg">{p.name}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Date and Title Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Tarih</label>
+                      <input
+                        type="text"
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-violet-500 outline-none text-white font-bold"
+                        value={generalReportData.date}
+                        onChange={(e) => setGeneralReportData({ ...generalReportData, date: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Rapor Başlığı</label>
+                      <input
+                        type="text"
+                        placeholder="TIBBİ RAPOR / MEDICAL REPORT"
+                        className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-violet-500 outline-none text-white font-bold"
+                        value={generalReportData.title}
+                        onChange={(e) => setGeneralReportData({ ...generalReportData, title: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Content Textarea */}
+                  <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Rapor İçeriği</label>
+                    <textarea
+                      className="w-full bg-slate-950 border-2 border-slate-800 rounded-xl px-4 py-3 focus:border-violet-500 outline-none text-white text-sm min-h-[300px] leading-relaxed"
+                      placeholder="Rapor içeriğini buraya yazınız..."
+                      value={generalReportData.content}
+                      onChange={(e) => setGeneralReportData({ ...generalReportData, content: e.target.value })}
+                    />
+                  </div>
+
+                  <button
+                    onClick={handlePrint}
+                    className="w-full py-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xl transition-all shadow-2xl bg-violet-600 hover:bg-violet-500 text-white"
+                  >
+                    <Printer className="w-7 h-7" />
+                    Raporu Yazdır (A4)
                   </button>
-                ))}
+                </div>
+
+                {/* Preview */}
+                <div className="w-full pt-8">
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-4 text-center">
+                    BELGE ÖNİZLEME (A4) / DOCUMENT PREVIEW
+                  </p>
+                  <div className="max-w-[400px] mx-auto border-4 border-slate-900 rounded-[2rem] overflow-hidden shadow-2xl bg-slate-900/50 backdrop-blur-sm p-4">
+                    <div className="scale-[0.5] origin-top h-[600px] overflow-hidden bg-white">
+                      <GeneralReportPrintable data={generalReportData} isPreview={true} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hidden Printable */}
+                <GeneralReportPrintable data={generalReportData} />
+              </div>
+            ) : selectedCategory.id === "post_op_forms" ? (
+              <div className="w-full relative animate-in fade-in zoom-in duration-300">
+                {/* Controls - Top Right */}
+                <div className="absolute -top-16 right-0 z-50 flex flex-col gap-3 items-end print:hidden pointer-events-none md:pointer-events-auto">
+                  <div className="pointer-events-auto flex flex-col gap-2 items-end">
+                    {/* Language Dropdown */}
+                    <div className="relative w-56" ref={dropdownRef}>
+                      <button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl hover:border-violet-500 transition-all shadow-lg group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl filter drop-shadow-md">
+                            {LANGUAGES.find(l => l.code === (selectedPostOpLang || 'tr'))?.flag}
+                          </span>
+                          <span className="text-slate-200 font-bold text-sm uppercase tracking-wider group-hover:text-white transition-colors">
+                            {LANGUAGES.find(l => l.code === (selectedPostOpLang || 'tr'))?.name}
+                          </span>
+                        </div>
+                        <ChevronLeft className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${showDropdown ? '-rotate-90' : 'rotate-90'}`} />
+                      </button>
+
+                      {showDropdown && (
+                        <div className="absolute top-full left-0 mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 p-1.5 grid gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
+                          {LANGUAGES.map((lang) => (
+                            <button
+                              key={lang.code}
+                              onClick={() => {
+                                setSelectedPostOpLang(lang.code);
+                                setShowDropdown(false);
+                              }}
+                              className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-all ${selectedPostOpLang === lang.code || (!selectedPostOpLang && lang.code === 'tr')
+                                ? 'bg-violet-600 text-white shadow-md'
+                                : 'hover:bg-slate-800 text-slate-300 hover:text-white'
+                                }`}
+                            >
+                              <span className="text-xl">{lang.flag}</span>
+                              <span className="font-bold text-xs uppercase tracking-wide">{lang.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Print Button */}
+                    <button
+                      onClick={handlePrint}
+                      className="w-56 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
+                    >
+                      <Printer className="w-4 h-4" />
+                      Yazdır / Print
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="w-full mt-4 md:mt-0 perspective-1000 print:hidden">
+                  <div className="transform transition-all duration-500 preserve-3d">
+                    <PostOpInfoPrintable lang={selectedPostOpLang || 'tr'} />
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
+
+
                 {selectedCategory.docs?.length > 0 ? (
                   selectedCategory.docs.map((doc: any, idx: number) => (
                     <div
@@ -1044,17 +1456,17 @@ export default function Home() {
                           rel="noopener noreferrer"
                           className="w-full p-5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-sm hover:shadow-lg"
                         >
-                          <span className="flex items-center gap-4 text-lg font-bold">
-                            {doc.iconType === "print" ? (
-                              <Printer className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                            ) : doc.iconType === "pdf" ? (
-                              <FileText className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                            ) : (
-                              <FileText className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                            )}
-                            {doc.name}
-                          </span>
-                          <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-white transition-colors" />
+                          <div className="flex items-center gap-4">
+                            {doc.name.toLowerCase().includes('print') ? (
+                              <Printer className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            ) : <FileText className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            }
+                            <span className="text-lg font-bold text-slate-200 group-hover:text-white transition-colors flex items-center gap-2">
+                              {doc.flag && <span>{doc.flag}</span>}
+                              {doc.name}
+                            </span>
+                          </div>
+                          <ExternalLink className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors opacity-50 group-hover:opacity-100" />
                         </a>
                       )}
                     </div>
@@ -1072,13 +1484,7 @@ export default function Home() {
       </div>
 
       {/* POST OP PRINTABLE VIEW */}
-      {
-        selectedPostOpLang && (
-          <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <PostOpInfoPrintable lang={selectedPostOpLang} />
-          </div>
-        )
-      }
+
 
       {/* Warning Modal for Future Patients */}
       {
@@ -1120,6 +1526,13 @@ export default function Home() {
       }
 
       {/* Hidden Print Components */}
+      {/* Dedicated Print View for PostOp - Outside of 3D transforms */}
+      {selectedPostOpLang && (
+        <div className="hidden print:block">
+          <PostOpInfoPrintable lang={selectedPostOpLang} />
+        </div>
+      )}
+
       {activeSubItem === "flight-report" && <FlightReportPrintable data={flightData} />}
       {activeSubItem === "id-report" && <IDReportPrintable data={idReportData} />}
     </main>
