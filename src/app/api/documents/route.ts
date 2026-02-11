@@ -42,7 +42,7 @@ export async function GET() {
                         // Strip leading/trailing | if still present
                         procedure = procedure.replace(/^[|\s]+|[|\s]+$/g, '');
 
-                        const langCodeRaw = match[2].toUpperCase();
+                        const langCodeRaw = match[1].toUpperCase();
                         const langCode = langCodeRaw === 'ENG' ? 'EN' : langCodeRaw;
 
                         const langLabel = {
@@ -163,8 +163,57 @@ export async function GET() {
                         flag: flag
                     };
                 });
+            } else if (cat === 'formlar') {
+                const groupedForms: Record<string, { name: string, langs: { label: string, flag: string, path: string }[] }> = {};
+                const standardForms: any[] = [];
+
+                files.forEach(file => {
+                    // Match "po kontrol öneri [2026] [LANG].pdf" - using a more robust regex
+                    const match = file.match(/^(?:po\s+kontrol\s+.*?\[2026\])\s+(TR|EN|ESP)\.pdf$/i);
+                    if (match) {
+                        const baseName = "Postop kontrol ve Bilgilendirme formu";
+                        const langCodeRaw = match[1].toUpperCase();
+                        const langCode = langCodeRaw === 'ESP' ? 'ES' : langCodeRaw;
+
+                        const langLabel = {
+                            TR: 'Türkçe', EN: 'İngilizce', ES: 'İspanyolca'
+                        }[langCode] || langCode;
+
+                        const flag = {
+                            TR: "🇹🇷", EN: "🇬🇧", ES: "🇪🇸"
+                        }[langCode] || "🌐";
+
+                        if (!groupedForms[baseName]) {
+                            groupedForms[baseName] = { name: baseName, langs: [] };
+                        }
+                        groupedForms[baseName].langs.push({
+                            label: langLabel,
+                            flag: flag,
+                            path: `/documents/formlar/${file}`
+                        });
+                    } else {
+                        standardForms.push({
+                            name: file.replace('.pdf', ''),
+                            path: `/documents/formlar/${file}`
+                        });
+                    }
+                });
+
+                // Ensure grouped forms are added
+                results[cat] = [...standardForms, ...Object.values(groupedForms)];
+            } else if (cat === 'bilgilendirme') {
+                results[cat] = files.map(file => {
+                    const isPrint = file.toLowerCase().includes('>print<');
+                    // Clean the name: remove .pdf, remove >print< marker, and trim extra spaces
+                    let cleanName = file.replace('.pdf', '').replace(/\s*>print<\s*/gi, '').trim();
+                    return {
+                        name: cleanName,
+                        path: `/documents/${cat}/${file}`,
+                        iconType: isPrint ? 'print' : 'send'
+                    };
+                });
             } else {
-                // General category (formlar, bilgilendirme)
+                // General category
                 results[cat] = files.map(file => ({
                     name: file.replace('.pdf', ''),
                     path: `/documents/${cat}/${file}`

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X, Globe } from "lucide-react";
+import { ArrowRight, FileText, ClipboardList, Pill, ChevronLeft, BarChart3, Plane, Printer, FileEdit, Languages, ExternalLink, Search, User, Home as HomeIcon, Calendar, AlertTriangle, X, Globe, MessageCircle, Mail, Folder } from "lucide-react";
 import { postOpContent } from "@/lib/postOpContent";
 
 /** 
@@ -114,7 +114,7 @@ const FlightReportPrintable = ({ data, isPreview = false }: { data: { name: stri
           <div className="space-y-6 px-4">
             <div className="relative">
               <p className="text-[13pt] leading-relaxed text-slate-900 text-justify">
-                Sayın <strong>{data.name || "..................."}</strong>'ın yapılan kontrol muayenesi ve tıbbi değerlendirmesi sonucunda, uçak ile seyahat etmesine engel teşkil edecek herhangi bir klinik bulguya rastlanmamıştır. Uçuş yapabilir, oturarak yolculuk yapabilir.
+                Üstte ismi ve hastaya uygulanan tedavi bilgileri bulunan hastanın yapılan kontrol muayenesi ve tıbbi değerlendirmesi sonucunda, uçak ile seyahat etmesine engel olabilecek tıbbi bir durum yoktur. Hasta uçuş yapabilir, oturarak yolculuk yapabilir.
               </p>
               <p className="text-[11pt] leading-relaxed text-slate-500 italic mt-4 text-justify border-l-4 border-slate-200 pl-6">
                 Following the control examination and medical evaluation of <strong>{data.name || "..................."}</strong>, no medical contraindications have been found to prevent air travel. The patient is cleared for flight and seated travel.
@@ -461,6 +461,7 @@ const IDReportPrintable = ({ data, isPreview = false }: { data: any, isPreview?:
         <div className="space-y-4 mb-4">
           <p className="font-bold text-base">Hasta Adı Soyadı: <span className="underline decoration-slate-300 underline-offset-4">{data.name || "..................."}</span></p>
           <p className="font-bold text-base">Ameliyat Tarihi: <span className="underline decoration-slate-300 underline-offset-4">{formatDateTR(data.surgeryDate)}</span></p>
+          <p className="font-bold text-base">Tedavi Gördüğü Hastane: <span className="underline decoration-slate-300 underline-offset-4">BHT Klinik Temas Hastanesi | Küçükçekmece / İSTANBUL</span></p>
         </div>
 
         <div className="space-y-6 flex-1 text-[13px] leading-relaxed">
@@ -565,15 +566,33 @@ const CATEGORIES = [
     title: "Formlar",
     icon: <FileEdit className="w-8 h-8" />,
     color: "bg-amber-700/80",
-    docs: [
-      { name: "Postop Bilgilendirme Fişi (Print)", iconType: "print", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_a11ebea7f07d4f0f968897b6f0b21c2c.pdf" },
-      { name: "Ameliyat Raporu Formu", iconType: "pdf", path: "https://www.ibrahimyagci.com/_files/ugd/bc99bb_113aae742f024773a8b44b09afb229ee.pdf" }
+    docs: [],
+    subItems: [
+      {
+        id: "html-master",
+        title: "HTML master sayfalar",
+        icon: (
+          <div className="relative">
+            <Folder className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 bg-red-500 rounded-full text-white text-[10px] font-black">!</span>
+          </div>
+        ),
+        subItems: [
+          { id: "html-forms", title: "po kontrol formu (çıktı alma)", icon: <FileEdit className="w-6 h-6" />, path: "/formlar/html" },
+          { id: "bos-recete", title: "Boş reçete", icon: <FileEdit className="w-6 h-6" />, path: "/formlar/bos-recete" }
+        ]
+      }
     ]
   },
   {
     id: "raporlar",
     title: "Raporlar",
-    icon: <BarChart3 className="w-8 h-8" />,
+    icon: (
+      <div className="flex items-center gap-1">
+        <Plane className="w-5 h-5" />
+        <User className="w-5 h-5" />
+      </div>
+    ),
     color: "bg-blue-700/80",
     subItems: [
       { id: "flight-report", title: "Uçuş Raporu", icon: <Plane className="w-6 h-6" /> },
@@ -664,15 +683,20 @@ export default function Home() {
   const displayCategories = useMemo(() => {
     return CATEGORIES.map(cat => {
       const dynamicItems = dynamicDocs[cat.id] || [];
-      if (dynamicItems.length === 0) return cat;
-
-      // Merge docs: filter out any dynamic docs that might overlap by name, or just append
-      // For onamlar, we have a complex structure
       const baseDocs = cat.docs || [];
+
+      // Deduplicate by name
+      const allDocs = [...baseDocs, ...dynamicItems];
+      const seen = new Set();
+      const uniqueDocs = allDocs.filter(doc => {
+        const isDuplicate = seen.has(doc.name);
+        seen.add(doc.name);
+        return !isDuplicate;
+      });
 
       return {
         ...cat,
-        docs: [...baseDocs, ...dynamicItems]
+        docs: uniqueDocs
       };
     });
   }, [dynamicDocs]);
@@ -682,7 +706,7 @@ export default function Home() {
 
   // Future Patient Logic
   const [selectedFuturePatient, setSelectedFuturePatient] = useState<any | null>(null);
-  const firstPastPatientRef = useRef<HTMLButtonElement>(null);
+  const firstTodayPatientRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Click outside listener for dropdown
@@ -720,22 +744,43 @@ export default function Home() {
     if (activeSubItem === "flight-report" || activeSubItem === "id-report") {
       let results = [...patients]; // Clone to sort
 
-      // Sort: Future -> Present -> Past
-      results.sort((a, b) => b.surgeryDate.localeCompare(a.surgeryDate));
-
-      // 1. Filter by Search Term (if exists)
-      if (searchTerm.length >= 2) {
-        const query = searchTerm.toLocaleLowerCase('tr-TR');
-        results = results.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(query));
-      }
-
-      // 2. Filter by Context (Flight Report = Last 30 Days OR Future)
+      // 1. Filter by Context FIRST (Flight Report = Last 30 Days + Next 7 Days)
       if (activeSubItem === "flight-report") {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        // Include Future (>Today) AND Recent Past (>= 30 days ago)
-        results = results.filter(p => new Date(p.surgeryDate) >= thirtyDaysAgo);
+        const sevenDaysLater = new Date();
+        sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+
+        // Include patients from 30 days ago to 7 days in the future
+        results = results.filter(p => {
+          const surgeryDate = new Date(p.surgeryDate);
+          return surgeryDate >= thirtyDaysAgo && surgeryDate <= sevenDaysLater;
+        });
+      }
+
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+
+      // Categorize patients into 3 groups
+      const todayPatients = results.filter(p => p.surgeryDate === today);
+      const pastPatients = results.filter(p => p.surgeryDate < today);
+      const futurePatients = results.filter(p => p.surgeryDate > today);
+
+      // Sort past patients descending (most recent first)
+      pastPatients.sort((a, b) => b.surgeryDate.localeCompare(a.surgeryDate));
+
+      // Sort future patients DESCENDING (farthest first, so they appear at top)
+      futurePatients.sort((a, b) => b.surgeryDate.localeCompare(a.surgeryDate));
+
+      // Combine: Future (reversed) → Today → Past
+      // This way: scroll UP = future, scroll DOWN = past, middle = today
+      results = [...futurePatients, ...todayPatients, ...pastPatients];
+
+      // 2. Filter by Search Term (if exists) - AFTER sorting
+      if (searchTerm.length >= 2) {
+        const query = searchTerm.toLocaleLowerCase('tr-TR');
+        results = results.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(query));
       }
 
       setFilteredPatients(results);
@@ -744,10 +789,10 @@ export default function Home() {
       if ((searchTerm.length >= 2) || showDropdown) {
         setShowSearch(results.length > 0);
 
-        // Auto-scroll to first past patient
+        // Auto-scroll to first today's patient (middle of list)
         setTimeout(() => {
-          if (firstPastPatientRef.current) {
-            firstPastPatientRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (firstTodayPatientRef.current) {
+            firstTodayPatientRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 100);
       } else {
@@ -857,90 +902,125 @@ export default function Home() {
                 </h2>
 
                 {selectedCategory.id === "onamlar" && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Package 1: Routine TR */}
-                    <button
-                      onClick={() => {
-                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel"];
-                        selectedCategory.docs?.forEach((doc: any) => {
-                          const nameLower = doc.name.toLowerCase();
-                          const isRoutine = keywords.some(k => nameLower.includes(k));
-                          if (isRoutine && !nameLower.includes("rinoplasti")) {
-                            if (doc.langs) {
-                              const l = doc.langs.find((x: any) => x.label === "TR");
-                              if (l) window.open(l.path, "_blank");
-                            }
-                          }
-                        });
-                      }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105"
+                  <div className="flex flex-col gap-2">
+                    {/* Package 1: Combined Forms with Language Selection */}
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setHoveredDoc('paket-1')}
+                      onMouseLeave={() => setHoveredDoc(null)}
                     >
-                      <span className="text-xs">Paket-1 (TR)</span>
-                      <span className="text-[9px] opacity-80 font-medium leading-none">Rutin</span>
-                    </button>
+                      <button
+                        onClick={() => {
+                          // Open all 3 PDFs in Turkish
+                          window.open('/documents/onamlar/onam | Anestezi TR.pdf', '_blank');
+                          setTimeout(() => window.open('/documents/onamlar/onam | Kan Transfüzyonu TR.pdf', '_blank'), 300);
+                          setTimeout(() => window.open('/documents/onamlar/onam | Görsel içerik kaydetme ve işleme onam formu.pdf', '_blank'), 600);
+                        }}
+                        className={`block w-full p-3 bg-emerald-600 border transition-all duration-300 rounded-xl ${hoveredDoc === 'paket-1' ? 'border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'border-emerald-700'}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-white font-bold text-sm">Paket-1</span>
+                            <span className="text-emerald-100 text-[10px] font-medium">Anestezi + Kan + Görsel</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9pt] font-black uppercase tracking-widest text-emerald-200">DİL SEÇİN</span>
+                            <Languages className="w-4 h-4 text-emerald-200 animate-pulse" />
+                          </div>
+                        </div>
+                      </button>
 
-                    {/* Package 2: Routine EN */}
-                    <button
-                      onClick={() => {
-                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel"];
-                        selectedCategory.docs?.forEach((doc: any) => {
-                          const nameLower = doc.name.toLowerCase();
-                          const isRoutine = keywords.some(k => nameLower.includes(k));
-                          if (isRoutine && !nameLower.includes("rinoplasti")) {
-                            if (doc.langs) {
-                              const l = doc.langs.find((x: any) => x.label === "EN");
-                              if (l) window.open(l.path, "_blank");
-                            }
-                          }
-                        });
-                      }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105"
-                    >
-                      <span className="text-xs">Paket-2 (EN)</span>
-                      <span className="text-[9px] opacity-80 font-medium leading-none">Routine</span>
-                    </button>
+                      <div className={`grid grid-cols-2 gap-2 mt-2 transition-all duration-300 ${hoveredDoc === 'paket-1' ? 'opacity-100 translate-y-0 max-h-20' : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none overflow-hidden'}`}>
+                        <button
+                          onClick={() => {
+                            // Open all 3 PDFs in Turkish
+                            window.open('/documents/onamlar/onam | Anestezi TR.pdf', '_blank');
+                            setTimeout(() => window.open('/documents/onamlar/onam | Kan Transfüzyonu TR.pdf', '_blank'), 300);
+                            setTimeout(() => window.open('/documents/onamlar/onam | Görsel içerik kaydetme ve işleme onam formu.pdf', '_blank'), 600);
+                          }}
+                          className="p-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg flex items-center justify-between transition-colors text-xs font-bold group/lang"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇹🇷</span>
+                            Türkçe
+                          </span>
+                          <Printer className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Open all 3 PDFs in English
+                            window.open('/documents/onamlar/onam | Anestezi EN.pdf', '_blank');
+                            setTimeout(() => window.open('/documents/onamlar/onam | Kan Transfüzyonu EN.pdf', '_blank'), 300);
+                            setTimeout(() => window.open('/documents/onamlar/onam | Görsel içerik kaydetme ve işleme onam formu.pdf', '_blank'), 600);
+                          }}
+                          className="p-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg flex items-center justify-between transition-colors text-xs font-bold group/lang"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇬🇧</span>
+                            İngilizce
+                          </span>
+                          <Printer className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
+                        </button>
+                      </div>
+                    </div>
 
-                    {/* Package 3: Routine + Rino TR */}
-                    <button
-                      onClick={() => {
-                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel", "rinoplasti"];
-                        selectedCategory.docs?.forEach((doc: any) => {
-                          const nameLower = doc.name.toLowerCase();
-                          const isTarget = keywords.some(k => nameLower.includes(k));
-                          if (isTarget) {
-                            if (doc.langs) {
-                              const l = doc.langs.find((x: any) => x.label === "TR");
-                              if (l) window.open(l.path, "_blank");
-                            }
-                          }
-                        });
-                      }}
-                      className="bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105 border border-emerald-500"
+                    {/* Package 2: Rino + Kosta with Language Selection */}
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setHoveredDoc('paket-2')}
+                      onMouseLeave={() => setHoveredDoc(null)}
                     >
-                      <span className="text-xs">Paket-1 + Rino</span>
-                      <span className="text-[9px] opacity-80 font-medium leading-none">Rutin + Rino</span>
-                    </button>
+                      <button
+                        onClick={() => {
+                          // Open Rino + Kosta PDFs in Turkish
+                          window.open('/documents/onamlar/onam | Rinoplasti TR.pdf', '_blank');
+                          setTimeout(() => window.open('/documents/onamlar/onam | Kosta kartilaj graft TR.pdf', '_blank'), 300);
+                        }}
+                        className={`block w-full p-3 bg-purple-600 border transition-all duration-300 rounded-xl ${hoveredDoc === 'paket-2' ? 'border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.3)]' : 'border-purple-700'}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-white font-bold text-sm">Paket-2</span>
+                            <span className="text-purple-100 text-[10px] font-medium">Rinoplasti + Kosta</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9pt] font-black uppercase tracking-widest text-purple-200">DİL SEÇİN</span>
+                            <Languages className="w-4 h-4 text-purple-200 animate-pulse" />
+                          </div>
+                        </div>
+                      </button>
 
-                    {/* Package 4: Routine + Rino EN */}
-                    <button
-                      onClick={() => {
-                        const keywords = ["anestezi", "kan", "fotoğraf", "görsel", "rinoplasti"];
-                        selectedCategory.docs?.forEach((doc: any) => {
-                          const nameLower = doc.name.toLowerCase();
-                          const isTarget = keywords.some(k => nameLower.includes(k));
-                          if (isTarget) {
-                            if (doc.langs) {
-                              const l = doc.langs.find((x: any) => x.label === "EN");
-                              if (l) window.open(l.path, "_blank");
-                            }
-                          }
-                        });
-                      }}
-                      className="bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded-lg font-bold text-left flex flex-col shadow-md transition-all hover:scale-105 border border-emerald-500"
-                    >
-                      <span className="text-xs">Paket-2 + Rino</span>
-                      <span className="text-[9px] opacity-80 font-medium leading-none">Routine + Rino</span>
-                    </button>
+                      <div className={`grid grid-cols-2 gap-2 mt-2 transition-all duration-300 ${hoveredDoc === 'paket-2' ? 'opacity-100 translate-y-0 max-h-20' : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none overflow-hidden'}`}>
+                        <button
+                          onClick={() => {
+                            // Open Rino + Kosta PDFs in Turkish
+                            window.open('/documents/onamlar/onam | Rinoplasti TR.pdf', '_blank');
+                            setTimeout(() => window.open('/documents/onamlar/onam | Kosta kartilaj graft TR.pdf', '_blank'), 300);
+                          }}
+                          className="p-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg flex items-center justify-between transition-colors text-xs font-bold group/lang"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇹🇷</span>
+                            Türkçe
+                          </span>
+                          <Printer className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Open Rino + Kosta PDFs in English
+                            window.open('/documents/onamlar/onam | Rinoplasti EN.pdf', '_blank');
+                            setTimeout(() => window.open('/documents/onamlar/onam | Kosta kartilaj graft EN.pdf', '_blank'), 300);
+                          }}
+                          className="p-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg flex items-center justify-between transition-colors text-xs font-bold group/lang"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇬🇧</span>
+                            İngilizce
+                          </span>
+                          <Printer className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -949,27 +1029,75 @@ export default function Home() {
             {(selectedCategory.id === "raporlar" || selectedCategory.id === "formlar") && !activeSubItem ? (
               <div className="space-y-4">
                 {selectedCategory.docs?.map((doc: any, i: number) => (
-                  <a
+                  <div
                     key={`doc-${i}`}
-                    href={doc.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-lg"
+                    className="relative"
+                    onMouseEnter={() => doc.langs && setHoveredDoc(doc.name)}
+                    onMouseLeave={() => setHoveredDoc(null)}
                   >
-                    <span className="flex items-center gap-4 text-xl font-bold">
-                      {doc.iconType === "print" ? <Printer className="w-6 h-6 text-emerald-500" /> : <FileText className="w-6 h-6 text-emerald-500" />}
-                      {doc.name}
-                    </span>
-                    <ExternalLink className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
-                  </a>
+                    {doc.langs ? (
+                      <div className="flex flex-col gap-2">
+                        <div
+                          onClick={() => {
+                            const trLang = doc.langs.find((l: any) => l.label === 'Türkçe');
+                            if (trLang) window.open(trLang.path, '_blank');
+                          }}
+                          className={`w-full p-6 bg-slate-900 border transition-all duration-300 rounded-3xl flex items-center justify-between cursor-pointer ${hoveredDoc === doc.name ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'border-slate-800'}`}
+                        >
+                          <span className="flex items-center gap-4 text-xl font-bold">
+                            <Printer className="w-6 h-6 text-emerald-500" />
+                            {doc.name}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9pt] font-black uppercase tracking-widest text-slate-500">DİL SEÇİN</span>
+                            <Languages className="w-5 h-5 text-emerald-500 animate-pulse" />
+                          </div>
+                        </div>
+
+                        <div className={`grid grid-cols-${doc.langs.length > 2 ? '3' : '2'} gap-2 transition-all duration-300 ${hoveredDoc === doc.name ? 'opacity-100 translate-y-0 max-h-20' : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none overflow-hidden'}`}>
+                          {doc.langs.map((l: any, i: number) => (
+                            <button
+                              key={i}
+                              onClick={() => window.open(l.path, '_blank', 'noopener,noreferrer')}
+                              className="p-3 bg-slate-800/80 hover:bg-emerald-600 text-slate-300 hover:text-white rounded-xl flex items-center justify-between transition-colors text-sm font-bold group/lang w-full"
+                            >
+                              <span className="flex items-center gap-2">
+                                {l.flag && <span>{l.flag}</span>}
+                                {l.label}
+                              </span>
+                              <ExternalLink className="w-3 h-3 opacity-50 group-hover/lang:opacity-100" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => window.open(doc.path, '_blank', 'noopener,noreferrer')}
+                        className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-lg"
+                      >
+                        <span className="flex items-center gap-4 text-xl font-bold">
+                          <Printer className="w-6 h-6 text-emerald-500" />
+                          {doc.name}
+                        </span>
+                        <ExternalLink className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                      </button>
+                    )}
+                  </div>
                 ))}
 
                 {selectedCategory.subItems?.map((item: any) => (
                   <button
                     key={item.id}
                     onClick={() => {
-                      if (item.path) window.location.href = item.path;
-                      else setActiveSubItem(item.id);
+                      if (item.path) {
+                        if (item.external) {
+                          window.open(item.path, '_blank');
+                        } else {
+                          window.location.href = item.path;
+                        }
+                      } else {
+                        setActiveSubItem(item.id);
+                      }
                     }}
                     className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-xl"
                   >
@@ -1014,8 +1142,16 @@ export default function Home() {
                           {filteredPatients.map((p, i) => (
                             <button
                               key={i}
+                              ref={p.surgeryDate === new Date().toISOString().split('T')[0] && i === filteredPatients.findIndex(fp => fp.surgeryDate === new Date().toISOString().split('T')[0]) ? firstTodayPatientRef : null}
                               onClick={() => {
                                 const formattedName = toTitleCaseTr(p.name);
+
+                                // Check if patient's surgery is in the future
+                                const today = new Date().toISOString().split('T')[0];
+                                if (p.surgeryDate > today) {
+                                  alert("⚠️ Dikkat, Bu hasta henüz ameliyat edilmemiştir!");
+                                }
+
                                 setFlightData({ ...flightData, name: formattedName, surgeryDate: p.surgeryDate });
                                 setSearchTerm("");
                                 setShowSearch(false);
@@ -1240,6 +1376,28 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            ) : activeSubItem === "html-master" ? (
+              <div className="space-y-4">
+                {selectedCategory.subItems
+                  ?.find((item: any) => item.id === "html-master")
+                  ?.subItems?.map((nestedItem: any) => (
+                    <button
+                      key={nestedItem.id}
+                      onClick={() => {
+                        if (nestedItem.path) {
+                          window.location.href = nestedItem.path;
+                        }
+                      }}
+                      className="w-full p-6 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-xl"
+                    >
+                      <span className="flex items-center gap-4 text-xl font-bold">
+                        {nestedItem.icon}
+                        {nestedItem.title}
+                      </span>
+                      <ArrowRight className="w-5 h-5 opacity-0 group-hover:translate-x-1 group-hover:opacity-100 transition-all text-emerald-500" />
+                    </button>
+                  ))}
+              </div>
             ) : activeSubItem === "general-report" ? (
               <div className="space-y-6">
                 <div className="glass-card p-8 border-violet-500/30 space-y-6 shadow-2xl relative bg-slate-900/40 rounded-[2.5rem] print:hidden">
@@ -1429,7 +1587,13 @@ export default function Home() {
                     >
                       {doc.langs ? (
                         <div className="flex flex-col gap-2">
-                          <div className={`w-full p-5 bg-slate-900 border transition-all duration-300 rounded-2xl flex items-center justify-between ${hoveredDoc === doc.name ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'border-slate-800'}`}>
+                          <div
+                            onClick={() => {
+                              const trLang = doc.langs.find((l: any) => l.label === 'Türkçe');
+                              if (trLang) window.open(trLang.path, '_blank');
+                            }}
+                            className={`w-full p-5 bg-slate-900 border transition-all duration-300 rounded-2xl flex items-center justify-between cursor-pointer ${hoveredDoc === doc.name ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'border-slate-800'}`}
+                          >
                             <span className="text-slate-100 font-bold text-lg">{doc.name}</span>
                             <div className="flex items-center gap-2">
                               <span className="text-[9pt] font-black uppercase tracking-widest text-emerald-500/60">DİL SEÇİN</span>
@@ -1463,10 +1627,16 @@ export default function Home() {
                           className="w-full p-5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-3xl flex items-center justify-between transition-all group shadow-sm hover:shadow-lg"
                         >
                           <div className="flex items-center gap-4">
-                            {doc.name.toLowerCase().includes('print') ? (
+                            {doc.iconType === 'print' || doc.name.toLowerCase().includes('print') ? (
                               <Printer className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                            ) : <FileText className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                            }
+                            ) : doc.iconType === 'send' ? (
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-6 h-6 text-emerald-500" />
+                                <Mail className="w-6 h-6 text-red-500" />
+                              </div>
+                            ) : (
+                              <FileText className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                            )}
                             <span className="text-lg font-bold text-slate-200 group-hover:text-white transition-colors flex items-center gap-2">
                               {doc.flag && <span>{doc.flag}</span>}
                               {doc.name}
