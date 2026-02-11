@@ -137,8 +137,34 @@ export async function GET() {
                     if (weightA !== weightB) return weightA - weightB;
                     return nameA.localeCompare(nameB, 'tr');
                 });
+            } else if (cat === 'receteler') {
+                // Parse prescriptions: "reçete rino | [Content]"
+                results[cat] = files.map(file => {
+                    let name = file.replace('.pdf', '');
+                    // Remove prefix
+                    name = name.replace(/^reçete rino\s*[|]?\s*/i, '').trim();
+
+                    // Detect language and flag
+                    let flag = "💊";
+                    if (name.includes('[TR]') || name.includes('Türkçe')) flag = "🇹🇷";
+                    else if (name.includes('[EN]') || name.includes('ingilizce') || name.includes('English')) flag = "🇬🇧";
+                    else if (name.includes('[ESP]') || name.includes('İspanyolca')) flag = "🇪🇸";
+                    else if (name.includes('[FR]') || name.includes('Fransızca')) flag = "🇫🇷";
+                    // Add more if needed
+
+                    // Clean up language tags from name for cleaner display
+                    // Optional: keep them if user prefers, but maybe format them?
+                    // Let's keep them for now but maybe remove the brackets if they are at the start?
+                    // Actually, let's just use the cleaned name and the flag.
+
+                    return {
+                        name: name,
+                        path: `/documents/${cat}/${file}`,
+                        flag: flag
+                    };
+                });
             } else {
-                // General category
+                // General category (formlar, bilgilendirme)
                 results[cat] = files.map(file => ({
                     name: file.replace('.pdf', ''),
                     path: `/documents/${cat}/${file}`
