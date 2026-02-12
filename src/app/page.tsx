@@ -1220,6 +1220,14 @@ export default function Home() {
                     <Printer className="w-7 h-7" />
                     Belgeyi Yazdır (A4)
                   </button>
+
+                  <button
+                    onClick={handlePrint}
+                    className="w-full py-4 bg-slate-900/50 border-2 border-slate-800/50 hover:bg-slate-800 hover:border-slate-700 text-slate-500 hover:text-slate-300 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all mt-2"
+                  >
+                    <Printer className="w-5 h-5" />
+                    Boş uçuş belgesi yazdır
+                  </button>
                   {/* Preview Section */}
                   {isFlightDataValid && (
                     <div className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-500">

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function Paket1() {
+function Paket1Content() {
     const searchParams = useSearchParams();
     const langParam = searchParams.get('lang') as 'tr' | 'en' | null;
     const autoPrint = searchParams.get('autoprint') === 'true';
@@ -31,12 +31,12 @@ export default function Paket1() {
         tr: {
             anestezi: '/documents/onamlar/onam | Anestezi TR.pdf',
             kan: '/documents/onamlar/onam | Kan Transfüzyonu TR.pdf',
-            gorsel: '/documents/onamlar/onam | Görsel İçerik Kaydetme ve İşleme Onam Formu TR.pdf'
+            gorsel: '/documents/onamlar/onam | Görsel içerik kaydetme ve işleme onam formu.pdf'
         },
         en: {
             anestezi: '/documents/onamlar/onam | Anestezi EN.pdf',
             kan: '/documents/onamlar/onam | Kan Transfüzyonu EN.pdf',
-            gorsel: '/documents/onamlar/onam | Görsel İçerik Kaydetme ve İşleme Onam Formu EN.pdf'
+            gorsel: '/documents/onamlar/onam | Görsel içerik kaydetme ve işleme onam formu.pdf'
         }
     };
 
@@ -124,5 +124,17 @@ export default function Paket1() {
                 ))}
             </div>
         </div>
+    );
+}
+
+export default function Paket1() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="text-xl font-bold text-slate-600 animate-pulse">Yükleniyor...</div>
+            </div>
+        }>
+            <Paket1Content />
+        </Suspense>
     );
 }
