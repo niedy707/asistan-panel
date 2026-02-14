@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
+import BuildTimestamp from "@/components/BuildTimestamp";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,6 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <BuildTimestamp />
       </body>
     </html>
   );
