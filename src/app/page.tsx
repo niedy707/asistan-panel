@@ -343,26 +343,34 @@ const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPrev
   const data = postOpContent[lang];
   if (!data) return <div>Content not found for {lang}</div>;
 
-  const containerClasses = "w-full bg-white text-slate-900 font-sans leading-relaxed h-full mx-auto";
-
   return (
-    <div className={containerClasses} id={isPreview ? "preview-postop" : "printable-postop"}>
+    <div className="w-full bg-white print:bg-white relative flex flex-col min-h-screen" id={isPreview ? "preview-postop" : "printable-postop"}>
       <style jsx global>{`
         @media print {
-          @page { margin: 10mm; size: A4; }
-          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-          .no-print { display: none !important; }
+          @page { 
+            margin: 0; 
+            size: A4; 
+          }
+          body { 
+            print-color-adjust: exact; 
+            -webkit-print-color-adjust: exact; 
+            margin: 0;
+            padding: 0;
+            overflow: visible !important;
+            height: auto !important;
+          }
+          .antigravity-scroll-lock {
+            overflow: visible !important;
+          }
         }
         .modern-green-box {
           background-color: #f0fdf4;
           border: 1px solid #bbf7d0;
           border-radius: 0.75rem;
-          padding: 1.5rem;
-          margin: 1.5rem 0;
+          padding: 1rem;
+          margin: 0.5rem 0;
           break-inside: avoid;
           page-break-inside: avoid;
-          break-before: column;
-          -webkit-column-break-before: always;
         }
         .modern-green-box ul {
           list-style-type: none;
@@ -384,36 +392,64 @@ const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPrev
           font-size: 0.9em;
           margin-left: 0.5rem;
         }
+        .duration-tag {
+          display: inline-block;
+          background-color: #f3e8ff;
+          color: #581c87;
+          padding: 0.1rem 0.4rem;
+          border-radius: 0.3rem;
+          font-weight: 600;
+          font-size: 0.9em;
+          margin-left: 0.5rem;
+        }
       `}</style>
 
-      <div className="p-8 md:p-12 max-w-[210mm] mx-auto bg-white min-h-screen">
-        <div className="flex items-center justify-between border-b-2 border-slate-100 pb-6 mb-8">
+      {/* Content Container - Normal Page Layout */}
+      <div className="flex-1 w-full max-w-5xl mx-auto px-2 py-2 print:px-[15mm] print:py-[15mm] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b-2 border-slate-200 pb-2 mb-1">
           <div className="flex items-center gap-4 text-left">
-            <img src="/rinoplasti_logo.png" alt="Logo" className="w-20 h-20 object-contain" />
+            <img src="/logo_v2.png" alt="Logo" className="w-20 h-20 object-contain" />
             <div>
               <div className="text-blue-900 font-black text-2xl">Op. Dr. İbrahim YAĞCI</div>
               <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">Rinoplasti & KBB</div>
             </div>
           </div>
+          {/* QR Code - Top Right */}
           <div>
-            <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-sm font-bold uppercase tracking-wider">
-              {customLangs[lang] || lang.toUpperCase()}
-            </span>
+            <img
+              src="/qr_code.png"
+              alt="QR Code"
+              className="w-20 h-20"
+            />
           </div>
         </div>
 
-        <div className="columns-1 md:columns-2 print:columns-2 gap-8 space-y-0 block">
+
+        {/* Title and Language Badge - Below Header Border */}
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-bold text-slate-800" style={{ fontSize: '20px' }}>
+            {data.content[0]?.title}
+          </h1>
+          <span className="inline-block px-2 py-0.5 bg-slate-100 rounded-full text-slate-600 font-bold uppercase tracking-wider" style={{ fontSize: '9px' }}>
+            {customLangs[lang] || lang.toUpperCase()}
+          </span>
+        </div>
+
+        {/* Content - Single Column for Readability */}
+        <div className="space-y-0">
           {data.content.map((section, idx) => (
-            <div key={idx} className="mb-6 break-inside-avoid page-break-inside-avoid inline-block w-full">
-              {section.title && !section.title.includes("9.") && (
-                <h2 className="text-xl font-bold text-slate-800 border-l-4 border-blue-500 pl-4 mb-2">
+            <div key={idx} className="break-inside-avoid mb-1">
+              {section.title && !section.title.includes("9.") && idx !== 0 && (
+                <h2 className="font-bold text-slate-800 border-l-4 border-blue-500 pl-2 mb-1" style={{ fontSize: '10px' }}>
                   <span dangerouslySetInnerHTML={{ __html: section.title }} />
                 </h2>
               )}
 
               {section.text && (
                 <div
-                  className="prose prose-slate max-w-none text-justify text-sm leading-relaxed"
+                  className="prose prose-slate max-w-none text-justify leading-tight text-slate-700"
+                  style={{ fontSize: '10px' }}
                   dangerouslySetInnerHTML={{ __html: section.text }}
                 />
               )}
@@ -421,13 +457,24 @@ const PostOpInfoPrintable = ({ lang, isPreview = false }: { lang: string, isPrev
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400 font-medium">
-          <div>
-            <p>Rhinoplasty Clinic</p>
-            <p>İstanbul, Türkiye</p>
-          </div>
-          <div>
-            www.ibrahimyagci.com
+        {/* Footer Content */}
+        <div className="w-full px-4 pb-8 print:pb-[10mm] print:px-0 mt-auto">
+          <div className="border-t-2 border-slate-900 pt-4 text-center bg-white">
+            <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-900 whitespace-nowrap">
+              <span>Op. Dr. İbrahim YAĞCI</span>
+              <span className="text-slate-300">|</span>
+              <div className="flex items-center gap-1">
+                <img src="/instagram_icon.png" alt="IG" className="w-3 h-3 object-contain" />
+                <span>@dribrahimyagci</span>
+              </div>
+              <span className="text-slate-300">|</span>
+              <span>ibrahimyagci.com</span>
+              <span className="text-slate-300">|</span>
+              <div className="flex items-center gap-1">
+                <img src="/whatsapp_icon_new.jpg" alt="WA" className="w-3 h-3 object-contain" />
+                <span>+90 (551) 199 9963</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -827,7 +874,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8 flex flex-col items-center w-full max-w-7xl mx-auto bg-slate-950 text-slate-100 print:bg-white print:p-0 print:m-0 print:max-w-none">
+    <main className="min-h-screen p-4 md:p-8 flex flex-col items-center w-full max-w-7xl mx-auto bg-slate-950 text-slate-100 print:bg-white print:p-0 print:m-0 print:max-w-none print:block">
       <div className="print:hidden w-full flex flex-col items-center max-w-2xl px-4">
 
         {/* Header / Navigation Check: Hide header if in PostOp reading mode */}
@@ -893,6 +940,17 @@ export default function Home() {
                 <HomeIcon className="w-4 h-4" />
                 Ana Sayfa
               </button>
+
+              {/* Print Button - Only for Post-Op Forms */}
+              {selectedCategory?.id === "post_op_forms" && (
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-5 py-2 bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 hover:text-violet-300 rounded-full font-bold transition-all border border-violet-500/20 shadow-lg"
+                >
+                  <Printer className="w-4 h-4" />
+                  Yazdır / Print
+                </button>
+              )}
             </div>
 
             {!selectedPostOpLang && (
@@ -1525,10 +1583,10 @@ export default function Home() {
                 <div className="absolute -top-16 right-0 z-50 flex flex-col gap-3 items-end print:hidden pointer-events-none md:pointer-events-auto">
                   <div className="pointer-events-auto flex flex-col gap-2 items-end">
                     {/* Language Dropdown */}
-                    <div className="relative w-56" ref={dropdownRef}>
+                    <div className="relative w-48" ref={dropdownRef}>
                       <button
                         onClick={() => setShowDropdown(!showDropdown)}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl hover:border-violet-500 transition-all shadow-lg group"
+                        className="w-full flex items-center justify-between px-4 py-2 bg-slate-900/50 backdrop-blur-md border border-slate-700/50 rounded-full hover:border-violet-500 transition-all shadow-xl group"
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-2xl filter drop-shadow-md">
@@ -1563,19 +1621,11 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Print Button */}
-                    <button
-                      onClick={handlePrint}
-                      className="w-56 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
-                    >
-                      <Printer className="w-4 h-4" />
-                      Yazdır / Print
-                    </button>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="w-full mt-4 md:mt-0 perspective-1000 print:hidden">
+                <div className="w-full mt-4 md:mt-0 perspective-1000">
                   <div className="transform transition-all duration-500 preserve-3d">
                     <PostOpInfoPrintable lang={selectedPostOpLang || 'tr'} />
                   </div>
@@ -1711,9 +1761,9 @@ export default function Home() {
 
       {/* Hidden Print Components */}
       {/* Dedicated Print View for PostOp - Outside of 3D transforms */}
-      {selectedPostOpLang && (
+      {selectedCategory?.id === "post_op_forms" && (
         <div className="hidden print:block">
-          <PostOpInfoPrintable lang={selectedPostOpLang} />
+          <PostOpInfoPrintable lang={selectedPostOpLang || 'tr'} />
         </div>
       )}
 

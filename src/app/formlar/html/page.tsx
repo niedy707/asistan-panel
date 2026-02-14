@@ -203,8 +203,13 @@ export default function PostOpRecommendations() {
                     body {
                         margin: 0;
                         padding: 0;
+                        overflow: visible !important;
+                        height: auto !important;
                         print-color-adjust: exact;
                         -webkit-print-color-adjust: exact;
+                    }
+                    .antigravity-scroll-lock {
+                        overflow: visible !important;
                     }
                 }
             `}</style>
@@ -231,8 +236,8 @@ export default function PostOpRecommendations() {
                 </button>
             </div>
 
-            {/* A4 Container: 210mm x 270mm - Shorter than A4 to force single page and reduce gap */}
-            <div className="w-[210mm] h-[270mm] bg-white p-[8mm] shadow-xl print:shadow-none print:w-[210mm] print:h-[270mm] print:mx-auto flex flex-col relative text-xs leading-snug font-sans text-slate-900 overflow-hidden">
+            {/* A4 Container: 210mm x 297mm - Standard A4 size */}
+            <div className="w-[210mm] min-h-[297mm] bg-white p-[8mm] shadow-xl print:shadow-none print:w-[210mm] print:min-h-[297mm] print:mx-auto flex flex-col relative text-xs leading-snug font-sans text-slate-900">
 
                 {/* Top Content Group */}
                 <div className="flex-1 flex flex-col">
@@ -452,7 +457,7 @@ export default function PostOpRecommendations() {
                 </div>
 
                 {/* Footer Note */}
-                <div className="absolute bottom-0 left-0 w-full px-[8mm] pb-[10mm] print:pb-0">
+                <div className="w-full mt-auto pt-4 pb-2">
                     <div className="border-t-2 border-slate-900 pt-3 text-center bg-white">
                         {/* Line 1 */}
                         <div className="flex items-center justify-center gap-6 text-sm font-bold text-slate-900 whitespace-nowrap">
